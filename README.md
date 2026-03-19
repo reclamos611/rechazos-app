@@ -1,4 +1,4 @@
-# rechazos-app[reporte_rechazo (6).html](https://github.com/user-attachments/files/26125047/reporte_rechazo.6.html)
+# rechazos-app[reporte_rechazo.html](https://github.com/user-attachments/files/26125047/reporte_rechazo.6.html)
 <!DOCTYPE html>
 <html lang="es">
 <head>
