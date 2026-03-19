@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Respuesta al Rechazo</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
+.app { max-width: 440px; margin: 0 auto; padding: 1rem 1rem 3rem; }
+.header { text-align: center; padding: 1.5rem 0 1rem; }
+.header-icon { width: 52px; height: 52px; border-radius: 50%; background: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
+.header-icon svg { width: 26px; height: 26px; fill: white; }
+.header h1 { font-size: 20px; font-weight: 600; color: #111; }
+.header p  { font-size: 13px; color: #888; margin-top: 4px; }
+.card { background: white; border: 1px solid #eee; border-radius: 14px; padding: 1.25rem; margin-bottom: 12px; }
+.label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: block; }
+.info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0; gap: 8px; }
+.info-row:last-child { border-bottom: none; }
+.info-row span:first-child { color: #999; flex-shrink: 0; }
+.info-row span:last-child  { color: #111; font-weight: 500; text-align: right; }
+.resp-btn { width: 100%; padding: 13px 16px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fafafa; color: #333; font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
+.resp-btn:hover { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; }
+.resp-btn.selected { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; font-weight: 600; }
+.resp-icon { width: 32px; height: 32px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+.obs-field { width: 100%; padding: 11px 13px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 15px; background: #fafafa; color: #111; font-family: inherit; outline: none; resize: vertical; min-height: 70px; margin-top: 10px; }
+.obs-field:focus { border-color: #2563EB; background: white; }
+.wsp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #25D366; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; text-decoration: none; transition: opacity 0.15s; }
+.wsp-btn:hover { opacity: 0.9; }
+.wsp-btn:disabled { background: #ccc; cursor: not-allowed; opacity: 1; }
+.foto-link { display: block; text-align: center; font-size: 13px; color: #2563EB; text-decoration: none; padding: 10px; border: 1px solid #e0e0e0; border-radius: 10px; margin-bottom: 8px; }
+.foto-link:hover { background: #EFF6FF; }
+.badge-sin-foto { text-align: center; font-size: 12px; color: #aaa; padding: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="header">
+    <div class="header-icon">
+      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/></svg>
+    </div>
+    <h1>Respuesta al rechazo</h1>
+    <p id="subtitulo">Elegí la respuesta para el chofer</p>
+  </div>
+
+  <!-- Info del rechazo -->
+  <div class="card">
+    <label class="label">Detalle del rechazo</label>
+    <div class="info-row"><span>Chofer</span><span id="info-chofer">—</span></div>
+    <div class="info-row"><span>Motivo</span><span id="info-motivo">—</span></div>
+    <div class="info-row"><span>Fecha</span><span id="info-fecha">—</span></div>
+    <div class="info-row"><span>Hora</span><span id="info-hora">—</span></div>
+  </div>
+
+  <!-- Foto -->
+  <div id="foto-container"></div>
+
+  <!-- Respuestas -->
+  <div class="card">
+    <label class="label">Tipo de respuesta</label>
+    <button class="resp-btn" onclick="selectResp(0, this)">
+      <div class="resp-icon">🕐</div>
+      <span>Pasar en el horario sugerido en la observación</span>
+    </button>
+    <button class="resp-btn" onclick="selectResp(1, this)">
+      <div class="resp-icon">❌</div>
+      <span>No se logró gestionar la recepción del pedido</span>
+    </button>
+    <button class="resp-btn" onclick="selectResp(2, this)">
+      <div class="resp-icon">✅</div>
+      <span>Pasar nuevamente, ya se gestionó la entrega</span>
+    </button>
+    <textarea class="obs-field" id="obs-resp" placeholder="Observación adicional (opcional)..."></textarea>
+  </div>
+
+  <a id="btn-enviar" class="wsp-btn" style="pointer-events:none;background:#ccc">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.529 5.849L0 24l6.335-1.51A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.01-1.37l-.36-.213-3.76.896.953-3.66-.234-.376A9.818 9.818 0 1 1 12 21.818z"/></svg>
+    Responder al chofer
+  </a>
+</div>
+
+<script>
+const params = new URLSearchParams(window.location.search);
+const chofer   = params.get('chofer')   || '';
+const choferCel= params.get('cel')      || '';
+const motivo   = params.get('motivo')   || '';
+const fecha    = params.get('fecha')    || '';
+const hora     = params.get('hora')     || '';
+const foto     = params.get('foto')     || '';
+const vendedor = params.get('vendedor') || '';
+
+document.getElementById('info-chofer').textContent = chofer;
+document.getElementById('info-motivo').textContent = motivo;
+document.getElementById('info-fecha').textContent  = fecha;
+document.getElementById('info-hora').textContent   = hora;
+document.getElementById('subtitulo').textContent   = vendedor ? `Vendedor: ${vendedor}` : 'Elegí la respuesta para el chofer';
+
+const fotoContainer = document.getElementById('foto-container');
+if(foto) {
+  fotoContainer.innerHTML = `<a href="${foto}" target="_blank" class="foto-link">📸 Ver foto del rechazo</a>`;
+} else {
+  fotoContainer.innerHTML = `<p class="badge-sin-foto">Sin foto adjunta</p>`;
+}
+
+const RESPUESTAS = [
+  'Pasar en el horario sugerido en la observación',
+  'No se logró gestionar la recepción del pedido',
+  'Pasar nuevamente, ya se gestionó la entrega',
+];
+
+let selectedIdx = -1;
+
+function selectResp(idx, btn) {
+  selectedIdx = idx;
+  document.querySelectorAll('.resp-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  const obs = document.getElementById('obs-resp').value.trim();
+  buildWspLink(idx, obs);
+}
+
+document.getElementById('obs-resp').addEventListener('input', function() {
+  if(selectedIdx >= 0) buildWspLink(selectedIdx, this.value.trim());
+});
+
+function buildWspLink(idx, obs) {
+  const respTxt = RESPUESTAS[idx];
+  const obsLinea = obs ? `\n📝 ${obs}` : '';
+  const msg =
+    `✅ *RESPUESTA AL RECHAZO*\n\n` +
+    `👔 Vendedor: ${vendedor}\n` +
+    `❌ Motivo original: ${motivo}\n\n` +
+    `📋 Respuesta: ${respTxt}` +
+    obsLinea +
+    `\n\n_${fecha} ${hora}_`;
+
+  const btn = document.getElementById('btn-enviar');
+  btn.href = `https://wa.me/54${choferCel}?text=${encodeURIComponent(msg)}`;
+  btn.style.background = '#25D366';
+  btn.style.pointerEvents = 'auto';
+}
+</script>
+</body>
+</html>
