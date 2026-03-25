@@ -43,7 +43,6 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <p id="subtitulo">Elegí la respuesta para el chofer</p>
   </div>
 
-  <!-- Info del rechazo -->
   <div class="card">
     <label class="label">Detalle del rechazo</label>
     <div class="info-row"><span>Chofer</span><span id="info-chofer">—</span></div>
@@ -52,48 +51,55 @@ body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; b
     <div class="info-row"><span>Hora</span><span id="info-hora">—</span></div>
   </div>
 
-  <!-- Foto -->
   <div id="foto-container"></div>
 
-  <!-- Respuestas -->
   <div class="card">
     <label class="label">Tipo de respuesta</label>
+
     <button class="resp-btn" onclick="selectResp(0, this)">
       <div class="resp-icon">🕐</div>
       <span>Pasar en el horario sugerido en la observación</span>
     </button>
+
     <button class="resp-btn" onclick="selectResp(1, this)">
       <div class="resp-icon">❌</div>
       <span>No se logró gestionar la recepción del pedido</span>
     </button>
+
     <button class="resp-btn" onclick="selectResp(2, this)">
       <div class="resp-icon">✅</div>
       <span>Pasar nuevamente, ya se gestionó la entrega</span>
     </button>
+
     <textarea class="obs-field" id="obs-resp" placeholder="Observación adicional (opcional)..."></textarea>
   </div>
 
   <a id="btn-enviar" class="wsp-btn" style="pointer-events:none;background:#ccc">
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.121 1.529 5.849L0 24l6.335-1.51A11.955 11.955 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.01-1.37l-.36-.213-3.76.896.953-3.66-.234-.376A9.818 9.818 0 1 1 12 21.818z"/></svg>
     Responder al chofer
   </a>
 </div>
 
 <script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWPwc2c2uFyX555zGyPOyZssrTR_PMiCDfhlw4bB2h9Y0_WNoNydb-YRF4OqSykqwD/exec";
+
 const params = new URLSearchParams(window.location.search);
-const chofer   = params.get('chofer')   || '';
-const choferCel= params.get('cel')      || '';
-const motivo   = params.get('motivo')   || '';
-const fecha    = params.get('fecha')    || '';
-const hora     = params.get('hora')     || '';
-const foto     = params.get('foto')     || '';
+
+const id       = params.get('id') || ''; // 🔴 NUEVO
+const chofer   = params.get('chofer') || '';
+const choferCel= params.get('cel') || '';
+const motivo   = params.get('motivo') || '';
+const fecha    = params.get('fecha') || '';
+const hora     = params.get('hora') || '';
+const foto     = params.get('foto') || '';
 const vendedor = params.get('vendedor') || '';
 
 document.getElementById('info-chofer').textContent = chofer;
 document.getElementById('info-motivo').textContent = motivo;
 document.getElementById('info-fecha').textContent  = fecha;
 document.getElementById('info-hora').textContent   = hora;
-document.getElementById('subtitulo').textContent   = vendedor ? `Vendedor: ${vendedor}` : 'Elegí la respuesta para el chofer';
+
+document.getElementById('subtitulo').textContent =
+  vendedor ? `Vendedor: ${vendedor}` : 'Elegí la respuesta para el chofer';
 
 const fotoContainer = document.getElementById('foto-container');
 if(foto) {
@@ -126,6 +132,7 @@ document.getElementById('obs-resp').addEventListener('input', function() {
 function buildWspLink(idx, obs) {
   const respTxt = RESPUESTAS[idx];
   const obsLinea = obs ? `\n📝 ${obs}` : '';
+
   const msg =
     `✅ *RESPUESTA AL RECHAZO*\n\n` +
     `👔 Vendedor: ${vendedor}\n` +
@@ -135,10 +142,17 @@ function buildWspLink(idx, obs) {
     `\n\n_${fecha} ${hora}_`;
 
   const btn = document.getElementById('btn-enviar');
+
   btn.href = `https://wa.me/54${choferCel}?text=${encodeURIComponent(msg)}`;
   btn.style.background = '#25D366';
   btn.style.pointerEvents = 'auto';
+
+  // 🔴 MARCAR COMO RESUELTO
+  if(id){
+    fetch(`${SCRIPT_URL}?accion=resolver&id=${id}`);
+  }
 }
 </script>
+
 </body>
 </html>
