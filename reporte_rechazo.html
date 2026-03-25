@@ -457,8 +457,12 @@ function buildResumenCalle() {
   const hora     = fecha.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});
   const fechaStr = fecha.toLocaleDateString('es-AR');
 
+  // 🔴 ID ÚNICO DEL RECLAMO
+  const ID = Date.now().toString();
+
   // Link de respuesta para el vendedor
   const respParams = new URLSearchParams({
+    id: ID, // 🔴 CLAVE
     chofer:   state.chofer.nombre,
     cel:      state.chofer.cel,
     motivo:   state.motivo,
@@ -468,6 +472,7 @@ function buildResumenCalle() {
     foto:     state.fotoCldUrl || '',
     vendedor: state.vendedor.codigo + ' - ' + state.vendedor.nombre,
   });
+
   const respLink = RESPUESTA_URL + '?' + respParams.toString();
 
   const fotoLinea = state.fotoCldUrl ? `\n📸 Foto: ${state.fotoCldUrl}` : '';
@@ -483,10 +488,14 @@ function buildResumenCalle() {
     `\n\n👉 *Respondé acá:* ${respLink}` +
     `\n\n_Tocá el link para gestionar el rechazo._`;
 
-  document.getElementById('wsp-v').href = `https://wa.me/${state.vendedor.wsp}?text=${encodeURIComponent(msg)}`;
+  document.getElementById('wsp-v').href =
+    `https://wa.me/${state.vendedor.wsp}?text=${encodeURIComponent(msg)}`;
 
   const thumb = document.getElementById('foto-thumb');
-  if(state.fotoLocalUrl){thumb.src=state.fotoLocalUrl;thumb.style.display='block';}
+  if(state.fotoLocalUrl){
+    thumb.src = state.fotoLocalUrl;
+    thumb.style.display = 'block';
+  }
 
   document.getElementById('resumen-calle').innerHTML = `
     <div class="resumen-row"><span>Chofer</span><span>${state.chofer.id} — ${state.chofer.nombre}</span></div>
@@ -496,11 +505,17 @@ function buildResumenCalle() {
     <div class="resumen-row"><span>Foto</span><span style="color:${state.fotoCldUrl?'#1D9E75':'#e24b4a'}">${state.fotoCldUrl?'✓ Subida':'Sin conexión'}</span></div>
     <div class="resumen-row"><span>Hora</span><span>${hora}</span></div>`;
 
+  // 🔴 IMPORTANTE: también mandamos el ID a Sheets
   saveToSheets({
-    tipo:'Rechazo Calle', fecha:fechaStr, hora,
+    id: ID,
+    tipo:'Rechazo Calle',
+    fecha:fechaStr,
+    hora,
     chofer:`${state.chofer.id} - ${state.chofer.nombre}`,
     vendedor:`${state.vendedor.codigo} - ${state.vendedor.nombre}`,
-    motivo:state.motivo, observacion:state.obs||'', foto:state.fotoCldUrl||''
+    motivo:state.motivo,
+    observacion:state.obs||'',
+    foto:state.fotoCldUrl||''
   }, 'calle');
 }
 
