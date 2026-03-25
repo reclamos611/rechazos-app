@@ -2,154 +2,152 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Respuesta al Rechazo</title>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestionar Rechazo</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f5f5; min-height: 100vh; }
-.app { max-width: 440px; margin: 0 auto; padding: 1rem 1rem 3rem; }
-.header { text-align: center; padding: 1.5rem 0 1rem; }
-.header-icon { width: 52px; height: 52px; border-radius: 50%; background: #2563EB; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; }
-.header-icon svg { width: 26px; height: 26px; fill: white; }
-.header h1 { font-size: 20px; font-weight: 600; color: #111; }
-.header p  { font-size: 13px; color: #888; margin-top: 4px; }
-.card { background: white; border: 1px solid #eee; border-radius: 14px; padding: 1.25rem; margin-bottom: 12px; }
-.label { font-size: 11px; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; display: block; }
-.info-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; border-bottom: 1px solid #f0f0f0; gap: 8px; }
-.info-row:last-child { border-bottom: none; }
-.info-row span:first-child { color: #999; flex-shrink: 0; }
-.info-row span:last-child  { color: #111; font-weight: 500; text-align: right; }
-.resp-btn { width: 100%; padding: 13px 16px; border: 1px solid #e0e0e0; border-radius: 10px; background: #fafafa; color: #333; font-size: 14px; cursor: pointer; text-align: left; margin-bottom: 8px; transition: all 0.15s; display: flex; align-items: center; gap: 10px; }
-.resp-btn:hover { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; }
-.resp-btn.selected { border-color: #2563EB; background: #EFF6FF; color: #1D4ED8; font-weight: 600; }
-.resp-icon { width: 32px; height: 32px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
-.obs-field { width: 100%; padding: 11px 13px; border: 1px solid #e0e0e0; border-radius: 10px; font-size: 15px; background: #fafafa; color: #111; font-family: inherit; outline: none; resize: vertical; min-height: 70px; margin-top: 10px; }
-.obs-field:focus { border-color: #2563EB; background: white; }
-.wsp-btn { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 14px; background: #25D366; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 8px; text-decoration: none; transition: opacity 0.15s; }
-.wsp-btn:hover { opacity: 0.9; }
-.foto-link { display: block; text-align: center; font-size: 13px; color: #2563EB; text-decoration: none; padding: 10px; border: 1px solid #e0e0e0; border-radius: 10px; margin-bottom: 8px; }
-.foto-link:hover { background: #EFF6FF; }
-.badge-sin-foto { text-align: center; font-size: 12px; color: #aaa; padding: 8px; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
+  .header { background: #c0392b; color: white; padding: 16px 20px; text-align: center; }
+  .header h1 { font-size: 18px; font-weight: 700; }
+  .header p { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+  .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .step-title { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { color: #888; }
+  .info-value { font-weight: 600; color: #1a1a2e; text-align: right; max-width: 60%; }
+  .foto-link { color: #c0392b; text-decoration: none; font-weight: 700; }
+  .btn { width: 100%; border: 2px solid #e0e0e0; background: white; border-radius: 10px; padding: 14px; cursor: pointer; font-size: 15px; font-weight: 600; color: #333; transition: all 0.2s; text-align: center; margin-bottom: 8px; display: block; }
+  .btn:active { transform: scale(0.97); }
+  .btn.selected { border-color: #c0392b; background: #c0392b; color: white; }
+  .btn-send { width: 100%; border: none; background: #25D366; color: white; border-radius: 10px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; }
+  .btn-send:disabled { background: #ccc; cursor: not-allowed; }
+  .input { width: 100%; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; transition: border 0.2s; margin-top: 10px; }
+  .input:focus { border-color: #c0392b; }
+  .status { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 10px; display: none; }
+  .status.ok { background: #e6f9ee; color: #1a7a3e; display: block; }
+  .status.err { background: #fde8e8; color: #c0392b; display: block; }
+  .status.loading { background: #fff3cd; color: #856404; display: block; }
+  .id-badge { background: #f0f2f5; border-radius: 8px; padding: 6px 12px; font-size: 12px; color: #555; text-align: center; margin-bottom: 12px; }
 </style>
 </head>
-
 <body>
 
-<div class="app">
+<div class="header">
+  <h1>⚡ GESTIONAR RECHAZO</h1>
+  <p>Respondé al chofer para frenar el rechazo</p>
+</div>
 
-  <div class="header">
-    <div class="header-icon">
-      <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
-    </div>
-    <h1>Respuesta al rechazo</h1>
-    <p id="subtitulo">Elegí la respuesta para el chofer</p>
+<div class="container">
+
+  <div class="card">
+    <div class="id-badge" id="id-badge"></div>
+    <div class="step-title">Detalle del rechazo</div>
+    <div id="info-container"></div>
   </div>
 
   <div class="card">
-    <label class="label">Detalle del rechazo</label>
-    <div class="info-row"><span>Chofer</span><span id="info-chofer">—</span></div>
-    <div class="info-row"><span>Motivo</span><span id="info-motivo">—</span></div>
-    <div class="info-row"><span>Fecha</span><span id="info-fecha">—</span></div>
-    <div class="info-row"><span>Hora</span><span id="info-hora">—</span></div>
+    <div class="step-title">Tu respuesta</div>
+    <button class="btn" onclick="selectRespuesta(this, 'Me comunico con el cliente ahora')">📞 Me comunico con el cliente ahora</button>
+    <button class="btn" onclick="selectRespuesta(this, 'El cliente va a recibir — seguí viaje')">✅ El cliente va a recibir — seguí viaje</button>
+    <button class="btn" onclick="selectRespuesta(this, 'Dejá el pedido, lo resuelvo después')">📦 Dejá el pedido, lo resuelvo después</button>
+    <button class="btn" onclick="selectRespuesta(this, 'Retirá la mercadería — no se puede entregar')">↩️ Retirá la mercadería</button>
+    <textarea class="input" id="obs-extra" placeholder="Observación adicional (opcional)..."></textarea>
   </div>
 
-  <div id="foto-container"></div>
+  <div id="sheets-status" class="status"></div>
 
-  <div class="card">
-    <label class="label">Tipo de respuesta</label>
-
-    <button class="resp-btn" onclick="selectResp(0, this)">🕐 Pasar en horario sugerido</button>
-    <button class="resp-btn" onclick="selectResp(1, this)">❌ No se logró gestionar</button>
-    <button class="resp-btn" onclick="selectResp(2, this)">✅ Pasar nuevamente</button>
-
-    <textarea class="obs-field" id="obs-resp" placeholder="Observación adicional..."></textarea>
-  </div>
-
-  <a id="btn-enviar" class="wsp-btn" style="pointer-events:none;background:#ccc">
-    Responder al chofer
-  </a>
+  <button class="btn-send" id="btn-enviar" onclick="enviarRespuesta()" disabled>
+    📱 Responder al Chofer por WhatsApp
+  </button>
 
 </div>
 
 <script>
-
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz1S4hYekZtlgH2lqqiy8roDBkcsofiSknoT8uTmtQsDYBxiLdpX-DuVTak1q9-oG4p/exec";
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzWPwc2c2uFyX555zGyPOyZssrTR_PMiCDfhlw4bB2h9Y0_WNoNydb-YRF4OqSykqwD/exec';
 
 const params = new URLSearchParams(window.location.search);
+const rechazoID  = params.get('id')    || '';
+const choferNom  = params.get('chofer')|| '';
+const choferCel  = params.get('cel')   || '';
+const motivo     = params.get('motivo')|| '';
+const obs        = params.get('obs')   || '';
+const fecha      = params.get('fecha') || '';
+const hora       = params.get('hora')  || '';
+const foto       = params.get('foto')  || '';
+const vendedor   = params.get('vendedor') || '';
 
-const id        = params.get('id') || '';
-const chofer    = params.get('chofer') || '';
-const cel       = params.get('cel') || '';
-const motivo    = params.get('motivo') || '';
-const fecha     = params.get('fecha') || '';
-const hora      = params.get('hora') || '';
-const foto      = params.get('foto') || '';
-const vendedor  = params.get('vendedor') || '';
+let respuestaSeleccionada = '';
 
-document.getElementById('info-chofer').textContent = chofer;
-document.getElementById('info-motivo').textContent = motivo;
-document.getElementById('info-fecha').textContent  = fecha;
-document.getElementById('info-hora').textContent   = hora;
-document.getElementById('subtitulo').textContent   = vendedor;
+// Mostrar ID
+document.getElementById('id-badge').textContent = rechazoID ? '🆔 ID Rechazo: ' + rechazoID : '';
 
-if(foto){
-  document.getElementById('foto-container').innerHTML =
-    `<a href="${foto}" target="_blank" class="foto-link">📸 Ver foto</a>`;
-}
-
-const RESPUESTAS = [
-  'Pasar en horario sugerido',
-  'No se logró gestionar',
-  'Pasar nuevamente'
+// Armar info
+const container = document.getElementById('info-container');
+const rows = [
+  ['Chofer', choferNom],
+  ['Fecha', fecha + ' ' + hora],
+  ['Motivo', motivo],
 ];
+if (obs) rows.push(['Observación', obs]);
+if (vendedor) rows.push(['Vendedor', vendedor]);
+rows.forEach(([label, value]) => {
+  const div = document.createElement('div');
+  div.className = 'info-row';
+  div.innerHTML = `<span class="info-label">${label}</span><span class="info-value">${value}</span>`;
+  container.appendChild(div);
+});
+if (foto) {
+  const div = document.createElement('div');
+  div.className = 'info-row';
+  div.innerHTML = `<span class="info-label">Foto</span><span class="info-value"><a class="foto-link" href="${foto}" target="_blank">📸 Ver foto</a></span>`;
+  container.appendChild(div);
+}
 
-let selected = -1;
-
-function selectResp(i, btn){
-  selected = i;
-
-  document.querySelectorAll('.resp-btn').forEach(b => b.classList.remove('selected'));
+function selectRespuesta(btn, texto) {
+  document.querySelectorAll('.btn').forEach(b => b.classList.remove('selected'));
   btn.classList.add('selected');
-
-  updateBtn();
+  respuestaSeleccionada = texto;
+  document.getElementById('btn-enviar').disabled = false;
 }
 
-document.getElementById('obs-resp').addEventListener('input', updateBtn);
+function enviarRespuesta() {
+  const obsExtra = document.getElementById('obs-extra').value;
+  const respCompleta = respuestaSeleccionada + (obsExtra ? ' — ' + obsExtra : '');
 
-function updateBtn(){
+  // 1. Cambiar estado en Sheets
+  actualizarSheets(respCompleta);
 
-  if(selected < 0) return;
+  // 2. Abrir WhatsApp al chofer
+  const msg = `✅ *RESPUESTA AL RECHAZO*\n\n` +
+    `🆔 ID: ${rechazoID}\n` +
+    `👔 Vendedor: ${vendedor}\n` +
+    `📋 Motivo original: ${motivo}\n\n` +
+    `💬 *Respuesta:* ${respCompleta}\n\n` +
+    `_Gestionado en este momento._`;
 
-  const obs = document.getElementById('obs-resp').value;
-  const resp = RESPUESTAS[selected];
+  window.open('https://wa.me/54' + choferCel + '?text=' + encodeURIComponent(msg), '_blank');
+}
 
-  const msg =
-`✅ *RESPUESTA AL RECHAZO*
+function actualizarSheets(respuesta) {
+  const statusEl = document.getElementById('sheets-status');
+  statusEl.className = 'status loading';
+  statusEl.textContent = '⏳ Actualizando estado en planilla...';
 
-👔 ${vendedor}
-❌ ${motivo}
+  const params = new URLSearchParams({
+    accion: 'resolver',
+    id: rechazoID,
+    respuesta: respuesta
+  });
 
-📋 ${resp}
-${obs}
-
-_${fecha} ${hora}_`;
-
-  const btn = document.getElementById('btn-enviar');
-
-  btn.href = `https://wa.me/54${cel}?text=${encodeURIComponent(msg)}`;
-  btn.style.background = '#25D366';
-  btn.style.pointerEvents = 'auto';
-
-  // 🔴 SOLO AL HACER CLICK
-  btn.onclick = function(){
-    if(id){
-      fetch(`${SCRIPT_URL}?accion=resolver&id=${id}`);
-    }
+  const img = new Image();
+  img.onload = img.onerror = () => {
+    statusEl.className = 'status ok';
+    statusEl.textContent = '✓ Estado actualizado a Resuelto en la planilla';
   };
+  img.src = SHEETS_URL + '?' + params.toString();
 }
-
 </script>
-
 </body>
 </html>
