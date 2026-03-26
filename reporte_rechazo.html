@@ -125,8 +125,10 @@
       <div class="resumen" id="resumen-content"></div>
     </div>
     <div id="sheets-status" class="foto-status"></div>
-    <button class="btn-full whatsapp" onclick="enviarTodos()">📱 Enviar WhatsApp</button>
-    <p class="send-info" id="send-info-txt"></p>
+
+
+    <button class="btn-full whatsapp" id="btn-wsp-vendedor" onclick="enviarVendedor()">📱 WhatsApp al Vendedor</button>
+    <button class="btn-full" id="btn-wsp-supervisor" onclick="enviarSupervisor()" style="background:#0084ff;margin-top:8px;">👔 WhatsApp al Supervisor</button>
     <button class="btn-full" onclick="goHome()" style="background:#888;margin-top:12px;">🏠 Nuevo reporte</button>
   </div>
 
@@ -135,7 +137,7 @@
 <script>
 const CLOUDINARY_CLOUD  = 'dahri8jfr';
 const CLOUDINARY_PRESET = 'rechazos_unsigned';
-const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbxQn-pkGM9zQt3xKnK67FWHTuKigcTby5silRySykezpCzy74Oz2pppRimAu2ox-6RT/exec';
+const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbwLGiIXj-mTDe5J0ciTvj-lx__aNOTF5lWcs-vktKwfrcq-0GR4xdNKbyQrJQ7wxMgLow/exec';
 const RESPUESTA_URL     = 'https://reclamos611.github.io/rechazos-app/respuesta_vendedor.html';
 
 const SUPERVISORES = {
@@ -291,13 +293,15 @@ function goStep(step) {
     document.getElementById('back-envio').onclick = () =>
       goStep(state.tipo === 'calle' ? 'vendedor' : 'motivo');
 
-    // Info destinatarios
-    const infoEl = document.getElementById('send-info-txt');
-    if (state.tipo === 'calle' && state.vendedor) {
-      const sup = SUPERVISORES[state.vendedor.sup];
-      infoEl.textContent = `📨 Se enviará a: ${state.vendedor.nombre} + ${sup.nombre}`;
+    // Mostrar/ocultar botón supervisor según tipo
+    const btnSup = document.getElementById('btn-wsp-supervisor');
+    if (state.tipo === 'deposito') {
+      btnSup.textContent = '🏭 WhatsApp Sup. Depósito (Federico Perez)';
+      btnSup.style.background = '#1565c0';
     } else {
-      infoEl.textContent = `📨 Se enviará a: ${SUP_DEPOSITO.nombre}`;
+      const sup = state.vendedor ? SUPERVISORES[state.vendedor.sup] : null;
+      btnSup.textContent = '👔 WhatsApp al Supervisor' + (sup ? ' (' + sup.nombre + ')' : '');
+      btnSup.style.background = '#0084ff';
     }
   }
 
@@ -388,52 +392,53 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-function enviarTodos() {
+function enviarVendedor() {
+  if (state.tipo === 'deposito') return; // deposito no tiene vendedor
+  if (!state.vendedor) return;
+  const { fecha, hora } = getFechaHora();
+  const fotoLinea = state.fotoUrl ? `\n📸 Foto: ${state.fotoUrl}` : '';
+  const obsLinea  = state.obs     ? `\n📝 Obs: ${state.obs}`      : '';
+  const respParams = new URLSearchParams({
+    id: state.id, chofer: state.chofer.nombre, cel: state.chofer.cel,
+    motivo: state.motivo, obs: state.obs, fecha, hora,
+    foto: state.fotoUrl,
+    vendedor: state.vendedor.codigo + ' - ' + state.vendedor.nombre
+  });
+  const respLink = RESPUESTA_URL + '?' + respParams.toString();
+  const msg = `🚚 *RECHAZO DE ENTREGA*\n\n` +
+    `🆔 ID: ${state.id}\n` +
+    `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
+    `🕐 ${fecha} ${hora}\n` +
+    `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
+    `\n\n👉 *Respondé acá:* ${respLink}\n\n_Tocá el link para gestionar el rechazo._`;
+  window.open('https://wa.me/' + state.vendedor.wsp + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+function enviarSupervisor() {
   const { fecha, hora } = getFechaHora();
   const fotoLinea = state.fotoUrl ? `\n📸 Foto: ${state.fotoUrl}` : '';
   const obsLinea  = state.obs     ? `\n📝 Obs: ${state.obs}`      : '';
 
-  if (state.tipo === 'calle' && state.vendedor) {
-    // — Mensaje vendedor con link de respuesta —
-    const respParams = new URLSearchParams({
-      id: state.id, chofer: state.chofer.nombre, cel: state.chofer.cel,
-      motivo: state.motivo, obs: state.obs, fecha, hora,
-      foto: state.fotoUrl,
-      vendedor: state.vendedor.codigo + ' - ' + state.vendedor.nombre
-    });
-    const respLink = RESPUESTA_URL + '?' + respParams.toString();
-    const msgV = `🚚 *RECHAZO DE ENTREGA*\n\n` +
+  if (state.tipo === 'deposito') {
+    const msg = `🏭 *RECLAMO DEPÓSITO*\n\n` +
       `🆔 ID: ${state.id}\n` +
       `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
       `🕐 ${fecha} ${hora}\n` +
       `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
-      `\n\n👉 *Respondé acá:* ${respLink}\n\n_Tocá el link para gestionar el rechazo._`;
-
-    // — Mensaje supervisor —
+      `\n\n_Este es un aviso automático._`;
+    window.open('https://wa.me/' + SUP_DEPOSITO.wsp + '?text=' + encodeURIComponent(msg), '_blank');
+  } else {
+    if (!state.vendedor) return;
     const sup = SUPERVISORES[state.vendedor.sup];
-    const msgS = `👔 *AVISO SUPERVISOR — RECHAZO EN CALLE*\n\n` +
+    if (!sup) return;
+    const msg = `👔 *AVISO SUPERVISOR — RECHAZO EN CALLE*\n\n` +
       `🆔 ID: ${state.id}\n` +
       `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
       `🕐 ${fecha} ${hora}\n` +
       `🧑‍💼 Vendedor: ${state.vendedor.codigo} - ${state.vendedor.nombre}\n` +
       `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
       `\n\n_Este es un aviso automático._`;
-
-    window.open('https://wa.me/' + state.vendedor.wsp + '?text=' + encodeURIComponent(msgV), '_blank');
-    setTimeout(() => {
-      if (sup) window.open('https://wa.me/' + sup.wsp + '?text=' + encodeURIComponent(msgS), '_blank');
-    }, 1500);
-
-  } else {
-    // — Depósito → supervisor Federico —
-    const msgD = `🏭 *RECLAMO DEPÓSITO*\n\n` +
-      `🆔 ID: ${state.id}\n` +
-      `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
-      `🕐 ${fecha} ${hora}\n` +
-      `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
-      `\n\n_Este es un aviso automático._`;
-
-    window.open('https://wa.me/' + SUP_DEPOSITO.wsp + '?text=' + encodeURIComponent(msgD), '_blank');
+    window.open('https://wa.me/' + sup.wsp + '?text=' + encodeURIComponent(msg), '_blank');
   }
 }
 </script>
