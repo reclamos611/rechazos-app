@@ -1,0 +1,25 @@
+{
+  "name": "611 Rechazos",
+  "short_name": "Rechazos",
+  "description": "Sistema de gestión de rechazos en calle y reclamos de depósito",
+  "start_url": "/rechazos-app/reporte_rechazo.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#1a1a2e",
+  "background_color": "#1a1a2e",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
