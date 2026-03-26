@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reporte Rechazo</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
+  .header { background: #1a1a2e; color: white; padding: 16px 20px; text-align: center; }
+  .header h1 { font-size: 18px; font-weight: 700; letter-spacing: 1px; }
+  .header p { font-size: 12px; opacity: 0.7; margin-top: 2px; }
+  .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+  .card { background: white; border-radius: 12px; padding: 20px; margin-bottom: 14px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+  .step-title { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+  .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .btn { border: 2px solid #e0e0e0; background: white; border-radius: 10px; padding: 14px 10px; cursor: pointer; font-size: 14px; font-weight: 600; color: #333; transition: all 0.2s; text-align: center; }
+  .btn:active { transform: scale(0.97); }
+  .btn.selected { border-color: #1a1a2e; background: #1a1a2e; color: white; }
+  .btn-full { width: 100%; border: none; background: #1a1a2e; color: white; border-radius: 10px; padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; transition: background 0.2s; }
+  .btn-full:active { background: #2d2d4e; }
+  .btn-full:disabled { background: #ccc; cursor: not-allowed; }
+  .btn-full.whatsapp { background: #25D366; }
+  .btn-full.whatsapp:active { background: #1da851; }
+  .input { width: 100%; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; transition: border 0.2s; }
+  .input:focus { border-color: #1a1a2e; }
+  select.input { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23333' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+  .foto-preview { width: 100%; border-radius: 10px; margin-top: 10px; display: none; max-height: 200px; object-fit: cover; }
+  .foto-status { font-size: 13px; margin-top: 8px; padding: 8px 12px; border-radius: 8px; display: none; }
+  .foto-status.ok { background: #e6f9ee; color: #1a7a3e; display: block; }
+  .foto-status.err { background: #fde8e8; color: #c0392b; display: block; }
+  .foto-status.loading { background: #fff3cd; color: #856404; display: block; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  .home-btn { width: 100%; border: none; border-radius: 14px; padding: 22px; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 14px; color: white; transition: transform 0.15s; letter-spacing: 0.5px; }
+  .home-btn:active { transform: scale(0.97); }
+  .home-btn.calle { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+  .home-btn.deposito { background: linear-gradient(135deg, #2980b9, #1a6fa0); }
+  .resumen { background: #f8f9fa; border-radius: 10px; padding: 14px; font-size: 13px; line-height: 1.8; }
+  .resumen strong { color: #1a1a2e; }
+  .back-link { color: #888; font-size: 13px; cursor: pointer; display: inline-block; margin-bottom: 14px; }
+  .back-link:before { content: '← '; }
+  .send-info { font-size: 12px; color: #666; text-align: center; margin-top: 6px; padding: 6px; background: #f0f2f5; border-radius: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📦 SISTEMA DE RECHAZOS</h1>
+  <p>Gestión de rechazos y reclamos</p>
+</div>
+
+<div class="container">
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="card" style="margin-top:8px;">
+      <div class="step-title">¿Qué tipo de reporte?</div>
+      <button class="home-btn calle"    onclick="iniciarFlujo('calle')">🚚 Rechazo en Calle</button>
+      <button class="home-btn deposito" onclick="iniciarFlujo('deposito')">🏭 Reclamo Depósito</button>
+    </div>
+  </div>
+
+  <!-- CHOFER -->
+  <div class="screen" id="screen-chofer">
+    <div class="card">
+      <span class="back-link" onclick="goHome()">Inicio</span>
+      <div class="step-title">Paso 1 — Identificación</div>
+      <select class="input" id="sel-chofer">
+        <option value="">Seleccioná tu nombre...</option>
+      </select>
+    </div>
+    <button class="btn-full" onclick="goStep('foto')">Continuar →</button>
+  </div>
+
+  <!-- FOTO -->
+  <div class="screen" id="screen-foto">
+    <div class="card">
+      <span class="back-link" onclick="goStep('chofer')">Atrás</span>
+      <div class="step-title">Paso 2 — Foto del local</div>
+      <button class="btn-full" onclick="document.getElementById('input-foto').click()" style="background:#555;">📷 Sacar / Elegir Foto</button>
+      <input type="file" id="input-foto" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(this)">
+      <img id="foto-preview" class="foto-preview">
+      <div id="foto-status" class="foto-status"></div>
+    </div>
+    <button class="btn-full" id="btn-foto-next" onclick="goStep('motivo')" disabled>Continuar →</button>
+  </div>
+
+  <!-- MOTIVO -->
+  <div class="screen" id="screen-motivo">
+    <div class="card">
+      <span class="back-link" onclick="goStep('foto')">Atrás</span>
+      <div class="step-title">Paso 3 — Motivo</div>
+      <div class="btn-grid" id="motivos-grid"></div>
+      <div style="margin-top:12px;">
+        <textarea class="input" id="obs-input" placeholder="Observación (opcional)..." rows="2"></textarea>
+      </div>
+    </div>
+    <button class="btn-full" id="btn-motivo-next" disabled>Continuar →</button>
+  </div>
+
+  <!-- VENDEDOR (solo calle) -->
+  <div class="screen" id="screen-vendedor">
+    <div class="card">
+      <span class="back-link" onclick="goStep('motivo')">Atrás</span>
+      <div class="step-title">Paso 4 — Vendedor responsable</div>
+      <select class="input" id="sel-vendedor">
+        <option value="">Seleccioná el vendedor...</option>
+      </select>
+    </div>
+    <button class="btn-full" onclick="goStep('envio')">Continuar →</button>
+  </div>
+
+  <!-- ENVÍO -->
+  <div class="screen" id="screen-envio">
+    <div class="card">
+      <span class="back-link" id="back-envio" onclick="">Atrás</span>
+      <div class="step-title">Resumen del reporte</div>
+      <div class="resumen" id="resumen-content"></div>
+    </div>
+    <div id="sheets-status" class="foto-status"></div>
+    <button class="btn-full whatsapp" onclick="enviarTodos()">📱 Enviar WhatsApp</button>
+    <p class="send-info" id="send-info-txt"></p>
+    <button class="btn-full" onclick="goHome()" style="background:#888;margin-top:12px;">🏠 Nuevo reporte</button>
+  </div>
+
+</div>
+
+<script>
+const CLOUDINARY_CLOUD  = 'dahri8jfr';
+const CLOUDINARY_PRESET = 'rechazos_unsigned';
+const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbxQn-pkGM9zQt3xKnK67FWHTuKigcTby5silRySykezpCzy74Oz2pppRimAu2ox-6RT/exec';
+const RESPUESTA_URL     = 'https://reclamos611.github.io/rechazos-app/respuesta_vendedor.html';
+
+const SUPERVISORES = {
+  claudio:  { nombre:'Claudio Alvarado', wsp:'543516523927' },
+  natalia:  { nombre:'Natalia Perez',    wsp:'543515314678' },
+  sebastian:{ nombre:'Sebastian',        wsp:'543512630204' }
+};
+
+const SUP_DEPOSITO = { nombre:'Federico Perez', wsp:'543515724957' };
+
+const MOTIVOS_CALLE = [
+  'Cerrado','Dirección incorrecta o insuficiente','Mal armado',
+  'Mal Facturado','No está el dueño','No hizo pedido',
+  'Sin Dinero','Sin Stock','Zona peligrosa o camino malo'
+];
+const MOTIVOS_DEPOSITO = ['Envases Roto/Sucio','Mal Armado','Sin Stock'];
+
+const CHOFERES = [
+  {id:'C1', nombre:'GUZMAN DIEGO NORBERTO',        cel:'3515477459'},
+  {id:'C2', nombre:'JUAREZ PABLO NICOLAS',          cel:'3515477460'},
+  {id:'C3', nombre:'MOLINA SERGIO DANIEL',          cel:'3515477461'},
+  {id:'C4', nombre:'ROMERO CARLOS ALBERTO',         cel:'3515477462'},
+  {id:'C5', nombre:'TORRES MIGUEL ANGEL',           cel:'3515477463'},
+  {id:'C6', nombre:'FERNANDEZ LUCAS MARTIN',        cel:'3515477464'},
+  {id:'C7', nombre:'LOPEZ ROBERTO JUAN',            cel:'3515477465'},
+  {id:'C8', nombre:'GARCIA PABLO HERNAN',           cel:'3515477466'},
+  {id:'C9', nombre:'PEREZ DANIEL OSCAR',            cel:'3515477467'},
+  {id:'C10',nombre:'RODRIGUEZ FABIAN OMAR',         cel:'3515477468'},
+  {id:'C11',nombre:'SANCHEZ MARIO ALBERTO',         cel:'3515477469'},
+  {id:'C12',nombre:'GONZALEZ SERGIO FABIAN',        cel:'3515477470'},
+  {id:'C13',nombre:'DIAZ HERNAN GUSTAVO',           cel:'3515477471'},
+  {id:'C14',nombre:'MARTINEZ PABLO CESAR',          cel:'3515477472'},
+  {id:'C15',nombre:'ALVAREZ DIEGO RUBEN',           cel:'3515477473'},
+  {id:'C16',nombre:'ACOSTA JUAN CARLOS',            cel:'3515477474'},
+  {id:'C17',nombre:'BENITEZ OSCAR MIGUEL',          cel:'3515477475'},
+  {id:'C18',nombre:'CASTRO JORGE LUIS',             cel:'3515477476'},
+  {id:'C19',nombre:'DOMINGUEZ NESTOR RUBEN',        cel:'3515477477'},
+  {id:'C20',nombre:'ESCOBAR WALTER DANIEL',         cel:'3515477478'},
+  {id:'C21',nombre:'FLORES MARCELO OSCAR',          cel:'3515477479'},
+  {id:'C22',nombre:'HERRERA PABLO DAMIAN',          cel:'3515477480'}
+];
+
+const VENDEDORES = [
+  {codigo:'V31',nombre:'VILLALBA MAXIMILIANO EZEQUIEL',    wsp:'543513489668',sup:'claudio'},
+  {codigo:'V32',nombre:'OLIVARES EDGAR FABIAN ARIEL',      wsp:'543525642704',sup:'claudio'},
+  {codigo:'V33',nombre:'ORDOÑEZ RODRIGUEZ ISMAEL MARTIN',  wsp:'543521477092',sup:'claudio'},
+  {codigo:'V34',nombre:'BALDO JULIAN MARCELO',             wsp:'543541527601',sup:'claudio'},
+  {codigo:'V35',nombre:'BAZAN LUCIANO MANUEL',             wsp:'543549468268',sup:'claudio'},
+  {codigo:'V36',nombre:'NEIRA RUIZ NAHUEL',                wsp:'543518566977',sup:'claudio'},
+  {codigo:'V37',nombre:'SCORRANI IGNACIO MATIAS',          wsp:'543513938671',sup:'claudio'},
+  {codigo:'V38',nombre:'MARTINEZ MAURICIO SEBASTIAN',      wsp:'543515725775',sup:'claudio'},
+  {codigo:'V39',nombre:'MERLO RODOLFO SEBASTIAN',          wsp:'543546519096',sup:'claudio'},
+  {codigo:'V41',nombre:'CISTERNA DIEGO SEBASTIAN',         wsp:'543513660165',sup:'natalia'},
+  {codigo:'V42',nombre:'RESTIVO VALERIA CARINA',           wsp:'543516800868',sup:'sebastian'},
+  {codigo:'V43',nombre:'CUJAR ALEXANDER GREGOREVICHS',     wsp:'543536562443',sup:'sebastian'},
+  {codigo:'V44',nombre:'BERNAHOLA JORGE AGUSTIN',          wsp:'543513638356',sup:'sebastian'},
+  {codigo:'V46',nombre:'ROMERO PARAVICINI DIANA DE JESUS', wsp:'543536250642',sup:'natalia'},
+  {codigo:'V47',nombre:'OCHOA ROXANA DEL VALLE',           wsp:'543516134408',sup:'sebastian'},
+  {codigo:'V48',nombre:'SALDE MARCELA ANTONIA',            wsp:'543534250641',sup:'sebastian'},
+  {codigo:'V49',nombre:'MOREIRA AIRALDI TOBIAS URIEL',     wsp:'543517478111',sup:'sebastian'},
+  {codigo:'V51',nombre:'GONZALEZ MARIA CANDELARIA',        wsp:'543512847999',sup:'claudio'},
+  {codigo:'V52',nombre:'MARTINEZ DIEGO MATIAS',            wsp:'543536562554',sup:'natalia'},
+  {codigo:'V53',nombre:'CARRIZO EZEQUIEL ALEJANDRO',       wsp:'543516796032',sup:'natalia'},
+  {codigo:'V54',nombre:'MORENO LOBO JAVIER',               wsp:'543512068535',sup:'sebastian'},
+  {codigo:'V55',nombre:'PULIDO LARA EFRAIM JOSE',          wsp:'543516796124',sup:'natalia'},
+  {codigo:'V56',nombre:'RIVARA LORENZO',                   wsp:'543534250643',sup:'natalia'}
+];
+
+let state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'' };
+
+function generarID() {
+  return Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2,4).toUpperCase();
+}
+
+function goHome() {
+  state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'' };
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.add('active');
+  document.getElementById('foto-preview').style.display = 'none';
+  document.getElementById('foto-status').style.display = 'none';
+  document.getElementById('input-foto').value = '';
+  document.getElementById('btn-foto-next').disabled = true;
+  document.getElementById('obs-input').value = '';
+  document.getElementById('btn-motivo-next').disabled = true;
+  document.querySelectorAll('#motivos-grid .btn').forEach(b => b.classList.remove('selected'));
+}
+
+function iniciarFlujo(tipo) {
+  state.tipo = tipo;
+  state.id   = generarID();
+
+  // Choferes
+  const selC = document.getElementById('sel-chofer');
+  selC.innerHTML = '<option value="">Seleccioná tu nombre...</option>';
+  CHOFERES.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c.id;
+    o.textContent = c.id + ' - ' + c.nombre;
+    selC.appendChild(o);
+  });
+
+  // Vendedores
+  const selV = document.getElementById('sel-vendedor');
+  selV.innerHTML = '<option value="">Seleccioná el vendedor...</option>';
+  VENDEDORES.forEach(v => {
+    const o = document.createElement('option');
+    o.value = v.codigo;
+    o.textContent = v.codigo + ' - ' + v.nombre;
+    selV.appendChild(o);
+  });
+
+  // Motivos según tipo
+  const motivos = tipo === 'calle' ? MOTIVOS_CALLE : MOTIVOS_DEPOSITO;
+  const grid = document.getElementById('motivos-grid');
+  grid.innerHTML = '';
+  // depósito tiene pocos motivos, 1 columna
+  grid.style.gridTemplateColumns = motivos.length <= 4 ? '1fr' : '1fr 1fr';
+  motivos.forEach(m => {
+    const b = document.createElement('button');
+    b.className = 'btn';
+    b.textContent = m;
+    b.onclick = () => {
+      document.querySelectorAll('#motivos-grid .btn').forEach(x => x.classList.remove('selected'));
+      b.classList.add('selected');
+      state.motivo = m;
+      document.getElementById('btn-motivo-next').disabled = false;
+    };
+    grid.appendChild(b);
+  });
+
+  goStep('chofer');
+}
+
+function goStep(step) {
+  if (step === 'foto') {
+    const sel = document.getElementById('sel-chofer');
+    if (!sel.value) { alert('Seleccioná tu nombre'); return; }
+    state.chofer = CHOFERES.find(c => c.id === sel.value);
+  }
+
+  if (step === 'motivo') {
+    document.getElementById('btn-motivo-next').onclick = () =>
+      goStep(state.tipo === 'calle' ? 'vendedor' : 'envio');
+  }
+
+  if (step === 'envio') {
+    if (state.tipo === 'calle') {
+      const selV = document.getElementById('sel-vendedor');
+      if (!selV.value) { alert('Seleccioná el vendedor'); return; }
+      state.vendedor = VENDEDORES.find(v => v.codigo === selV.value);
+    }
+    armarEnvio();
+    document.getElementById('back-envio').onclick = () =>
+      goStep(state.tipo === 'calle' ? 'vendedor' : 'motivo');
+
+    // Info destinatarios
+    const infoEl = document.getElementById('send-info-txt');
+    if (state.tipo === 'calle' && state.vendedor) {
+      const sup = SUPERVISORES[state.vendedor.sup];
+      infoEl.textContent = `📨 Se enviará a: ${state.vendedor.nombre} + ${sup.nombre}`;
+    } else {
+      infoEl.textContent = `📨 Se enviará a: ${SUP_DEPOSITO.nombre}`;
+    }
+  }
+
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + (step === 'envio' ? 'envio' : step)).classList.add('active');
+}
+
+async function handleFoto(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const preview = document.getElementById('foto-preview');
+  const status  = document.getElementById('foto-status');
+  preview.src = URL.createObjectURL(file);
+  preview.style.display = 'block';
+  status.className = 'foto-status loading';
+  status.textContent = '⏳ Subiendo foto...';
+  document.getElementById('btn-foto-next').disabled = true;
+  try {
+    const fd = new FormData();
+    fd.append('file', file);
+    fd.append('upload_preset', CLOUDINARY_PRESET);
+    const res  = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`, { method:'POST', body:fd });
+    const data = await res.json();
+    if (data.secure_url) {
+      state.fotoUrl = data.secure_url;
+      status.className = 'foto-status ok';
+      status.textContent = '✓ Foto subida correctamente';
+      document.getElementById('btn-foto-next').disabled = false;
+    } else { throw new Error(); }
+  } catch {
+    status.className = 'foto-status err';
+    status.textContent = '⚠ No se pudo subir la foto. Podés continuar igual.';
+    state.fotoUrl = '';
+    document.getElementById('btn-foto-next').disabled = false;
+  }
+}
+
+function getFechaHora() {
+  const now = new Date();
+  return {
+    fecha: now.toLocaleDateString('es-AR'),
+    hora:  now.toLocaleTimeString('es-AR', { hour:'2-digit', minute:'2-digit' })
+  };
+}
+
+function armarEnvio() {
+  const { fecha, hora } = getFechaHora();
+  state.obs = document.getElementById('obs-input').value;
+
+  let html = `<strong>ID:</strong> ${state.id}<br>
+<strong>Tipo:</strong> ${state.tipo === 'calle' ? '🚚 Rechazo en Calle' : '🏭 Reclamo Depósito'}<br>
+<strong>Chofer:</strong> ${state.chofer.id} - ${state.chofer.nombre}<br>
+<strong>Fecha:</strong> ${fecha} ${hora}<br>
+<strong>Motivo:</strong> ${state.motivo}<br>`;
+  if (state.obs)      html += `<strong>Observación:</strong> ${state.obs}<br>`;
+  if (state.fotoUrl)  html += `<strong>Foto:</strong> <a href="${state.fotoUrl}" target="_blank">Ver foto 📸</a><br>`;
+  if (state.vendedor) html += `<strong>Vendedor:</strong> ${state.vendedor.codigo} - ${state.vendedor.nombre}<br>`;
+  document.getElementById('resumen-content').innerHTML = html;
+
+  guardarSheets(fecha, hora);
+}
+
+function guardarSheets(fecha, hora) {
+  const statusEl = document.getElementById('sheets-status');
+  statusEl.className = 'foto-status loading';
+  statusEl.textContent = '⏳ Guardando en planilla...';
+  const params = new URLSearchParams({
+    id: state.id, fecha, hora,
+    tipo:        state.tipo === 'calle' ? 'Rechazo Calle' : 'Reclamo Deposito',
+    chofer:      state.chofer.nombre,
+    vendedor:    state.vendedor ? state.vendedor.nombre : '',
+    motivo:      state.motivo,
+    observacion: state.obs,
+    foto:        state.fotoUrl
+  });
+  const img = new Image();
+  img.onload = img.onerror = () => {
+    statusEl.className = 'foto-status ok';
+    statusEl.textContent = '✓ Guardado en planilla';
+  };
+  img.src = SHEETS_URL + '?' + params.toString();
+}
+
+function enviarTodos() {
+  const { fecha, hora } = getFechaHora();
+  const fotoLinea = state.fotoUrl ? `\n📸 Foto: ${state.fotoUrl}` : '';
+  const obsLinea  = state.obs     ? `\n📝 Obs: ${state.obs}`      : '';
+
+  if (state.tipo === 'calle' && state.vendedor) {
+    // — Mensaje vendedor con link de respuesta —
+    const respParams = new URLSearchParams({
+      id: state.id, chofer: state.chofer.nombre, cel: state.chofer.cel,
+      motivo: state.motivo, obs: state.obs, fecha, hora,
+      foto: state.fotoUrl,
+      vendedor: state.vendedor.codigo + ' - ' + state.vendedor.nombre
+    });
+    const respLink = RESPUESTA_URL + '?' + respParams.toString();
+    const msgV = `🚚 *RECHAZO DE ENTREGA*\n\n` +
+      `🆔 ID: ${state.id}\n` +
+      `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
+      `🕐 ${fecha} ${hora}\n` +
+      `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
+      `\n\n👉 *Respondé acá:* ${respLink}\n\n_Tocá el link para gestionar el rechazo._`;
+
+    // — Mensaje supervisor —
+    const sup = SUPERVISORES[state.vendedor.sup];
+    const msgS = `👔 *AVISO SUPERVISOR — RECHAZO EN CALLE*\n\n` +
+      `🆔 ID: ${state.id}\n` +
+      `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
+      `🕐 ${fecha} ${hora}\n` +
+      `🧑‍💼 Vendedor: ${state.vendedor.codigo} - ${state.vendedor.nombre}\n` +
+      `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
+      `\n\n_Este es un aviso automático._`;
+
+    window.open('https://wa.me/' + state.vendedor.wsp + '?text=' + encodeURIComponent(msgV), '_blank');
+    setTimeout(() => {
+      if (sup) window.open('https://wa.me/' + sup.wsp + '?text=' + encodeURIComponent(msgS), '_blank');
+    }, 1500);
+
+  } else {
+    // — Depósito → supervisor Federico —
+    const msgD = `🏭 *RECLAMO DEPÓSITO*\n\n` +
+      `🆔 ID: ${state.id}\n` +
+      `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
+      `🕐 ${fecha} ${hora}\n` +
+      `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
+      `\n\n_Este es un aviso automático._`;
+
+    window.open('https://wa.me/' + SUP_DEPOSITO.wsp + '?text=' + encodeURIComponent(msgD), '_blank');
+  }
+}
+</script>
+</body>
+</html>
