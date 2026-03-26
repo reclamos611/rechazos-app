@@ -15,8 +15,8 @@
   .step-title { font-size: 13px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
   .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 14px; }
   .info-row:last-child { border-bottom: none; }
-  .info-label { color: #888; }
-  .info-value { font-weight: 600; color: #1a1a2e; text-align: right; max-width: 60%; }
+  .info-label { color: #888; flex-shrink: 0; margin-right: 10px; }
+  .info-value { font-weight: 600; color: #1a1a2e; text-align: right; }
   .foto-link { color: #c0392b; text-decoration: none; font-weight: 700; }
   .btn { width: 100%; border: 2px solid #e0e0e0; background: white; border-radius: 10px; padding: 14px; cursor: pointer; font-size: 15px; font-weight: 600; color: #333; transition: all 0.2s; text-align: center; margin-bottom: 8px; display: block; }
   .btn:active { transform: scale(0.97); }
@@ -25,18 +25,18 @@
   .btn-send:disabled { background: #ccc; cursor: not-allowed; }
   .input { width: 100%; border: 2px solid #e0e0e0; border-radius: 10px; padding: 12px; font-size: 14px; outline: none; transition: border 0.2s; margin-top: 10px; }
   .input:focus { border-color: #c0392b; }
-  .status { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 10px; display: none; }
-  .status.ok { background: #e6f9ee; color: #1a7a3e; display: block; }
-  .status.err { background: #fde8e8; color: #c0392b; display: block; }
-  .status.loading { background: #fff3cd; color: #856404; display: block; }
-  .id-badge { background: #f0f2f5; border-radius: 8px; padding: 6px 12px; font-size: 12px; color: #555; text-align: center; margin-bottom: 12px; }
+  .status { font-size: 13px; padding: 10px 14px; border-radius: 8px; margin-top: 10px; }
+  .status.ok      { background: #e6f9ee; color: #1a7a3e; }
+  .status.err     { background: #fde8e8; color: #c0392b; }
+  .status.loading { background: #fff3cd; color: #856404; }
+  .id-badge { background: #f0f2f5; border-radius: 8px; padding: 6px 12px; font-size: 12px; color: #555; text-align: center; margin-bottom: 12px; font-weight: 600; }
 </style>
 </head>
 <body>
 
 <div class="header">
   <h1>⚡ GESTIONAR RECHAZO</h1>
-  <p>Respondé al chofer para frenar el rechazo</p>
+  <p>Respondé al chofer para resolver el rechazo</p>
 </div>
 
 <div class="container">
@@ -56,7 +56,7 @@
     <textarea class="input" id="obs-extra" placeholder="Observación adicional (opcional)..."></textarea>
   </div>
 
-  <div id="sheets-status" class="status"></div>
+  <div id="sheets-status" class="status" style="display:none;"></div>
 
   <button class="btn-send" id="btn-enviar" onclick="enviarRespuesta()" disabled>
     📱 Responder al Chofer por WhatsApp
@@ -65,33 +65,33 @@
 </div>
 
 <script>
-const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbzWPwc2c2uFyX555zGyPOyZssrTR_PMiCDfhlw4bB2h9Y0_WNoNydb-YRF4OqSykqwD/exec';
+const SHEETS_URL = 'https://script.google.com/macros/s/AKfycbxQn-pkGM9zQt3xKnK67FWHTuKigcTby5silRySykezpCzy74Oz2pppRimAu2ox-6RT/exec';
 
-const params = new URLSearchParams(window.location.search);
-const rechazoID  = params.get('id')    || '';
-const choferNom  = params.get('chofer')|| '';
-const choferCel  = params.get('cel')   || '';
-const motivo     = params.get('motivo')|| '';
-const obs        = params.get('obs')   || '';
-const fecha      = params.get('fecha') || '';
-const hora       = params.get('hora')  || '';
-const foto       = params.get('foto')  || '';
-const vendedor   = params.get('vendedor') || '';
+const params    = new URLSearchParams(window.location.search);
+const rechazoID = params.get('id')       || '';
+const choferNom = params.get('chofer')   || '';
+const choferCel = params.get('cel')      || '';
+const motivo    = params.get('motivo')   || '';
+const obs       = params.get('obs')      || '';
+const fecha     = params.get('fecha')    || '';
+const hora      = params.get('hora')     || '';
+const foto      = params.get('foto')     || '';
+const vendedor  = params.get('vendedor') || '';
 
 let respuestaSeleccionada = '';
 
-// Mostrar ID
-document.getElementById('id-badge').textContent = rechazoID ? '🆔 ID Rechazo: ' + rechazoID : '';
+// ID badge
+document.getElementById('id-badge').textContent = rechazoID ? '🆔 ID Rechazo: ' + rechazoID : 'Sin ID';
 
-// Armar info
+// Info del rechazo
 const container = document.getElementById('info-container');
 const rows = [
-  ['Chofer', choferNom],
-  ['Fecha', fecha + ' ' + hora],
-  ['Motivo', motivo],
+  ['Chofer',  choferNom],
+  ['Fecha',   fecha + ' ' + hora],
+  ['Motivo',  motivo],
 ];
-if (obs) rows.push(['Observación', obs]);
-if (vendedor) rows.push(['Vendedor', vendedor]);
+if (obs)      rows.push(['Observación', obs]);
+if (vendedor) rows.push(['Vendedor',    vendedor]);
 rows.forEach(([label, value]) => {
   const div = document.createElement('div');
   div.className = 'info-row';
@@ -113,40 +113,41 @@ function selectRespuesta(btn, texto) {
 }
 
 function enviarRespuesta() {
-  const obsExtra = document.getElementById('obs-extra').value;
-  const respCompleta = respuestaSeleccionada + (obsExtra ? ' — ' + obsExtra : '');
+  const obsExtra    = document.getElementById('obs-extra').value;
+  const respFinal   = respuestaSeleccionada + (obsExtra ? ' — ' + obsExtra : '');
 
-  // 1. Cambiar estado en Sheets
-  actualizarSheets(respCompleta);
+  // 1. Guardar respuesta en Sheets
+  guardarRespuestaSheets(respFinal);
 
   // 2. Abrir WhatsApp al chofer
   const msg = `✅ *RESPUESTA AL RECHAZO*\n\n` +
     `🆔 ID: ${rechazoID}\n` +
     `👔 Vendedor: ${vendedor}\n` +
-    `📋 Motivo original: ${motivo}\n\n` +
-    `💬 *Respuesta:* ${respCompleta}\n\n` +
+    `📋 Motivo: ${motivo}\n\n` +
+    `💬 *Respuesta:* ${respFinal}\n\n` +
     `_Gestionado en este momento._`;
 
   window.open('https://wa.me/54' + choferCel + '?text=' + encodeURIComponent(msg), '_blank');
 }
 
-function actualizarSheets(respuesta) {
+function guardarRespuestaSheets(respuesta) {
   const statusEl = document.getElementById('sheets-status');
+  statusEl.style.display = 'block';
   statusEl.className = 'status loading';
-  statusEl.textContent = '⏳ Actualizando estado en planilla...';
+  statusEl.textContent = '⏳ Guardando respuesta en planilla...';
 
-  const params = new URLSearchParams({
-    accion: 'resolver',
-    id: rechazoID,
+  const p = new URLSearchParams({
+    accion:    'responder',
+    id:        rechazoID,
     respuesta: respuesta
   });
 
   const img = new Image();
   img.onload = img.onerror = () => {
     statusEl.className = 'status ok';
-    statusEl.textContent = '✓ Estado actualizado a Resuelto en la planilla';
+    statusEl.textContent = '✓ Respuesta guardada en planilla';
   };
-  img.src = SHEETS_URL + '?' + params.toString();
+  img.src = SHEETS_URL + '?' + p.toString();
 }
 </script>
 </body>
