@@ -57,6 +57,21 @@
   .logout-btn { background:none; border:none; color:rgba(255,255,255,0.35); font-size:12px; cursor:pointer; text-decoration:underline; }
   .user-chip { background:#e8f0fe; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; color:#1a1a2e; margin-bottom:4px; display:none; }
   .user-chip.show { display:block; }
+  /* MODAL CARTONES */
+  #modal-cartones { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
+  #modal-cartones.show { display:flex; }
+  .modal-box { background:white; border-radius:18px; padding:24px; width:100%; max-width:340px; box-shadow:0 8px 32px rgba(0,0,0,0.3); text-align:center; }
+  .modal-title { font-family:'Segoe UI',sans-serif; font-size:16px; font-weight:800; color:#1a1a2e; margin-bottom:4px; }
+  .modal-sub { font-size:12px; color:#888; margin-bottom:20px; }
+  .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
+  .modal-stat { background:#f0f2f5; border-radius:12px; padding:14px 10px; }
+  .modal-stat-num { font-size:32px; font-weight:800; color:#1a1a2e; line-height:1; }
+  .modal-stat-num.verde { color:#2e7d32; }
+  .modal-stat-num.rojo { color:#c0392b; }
+  .modal-stat-label { font-size:11px; color:#888; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
+  .modal-pct { font-size:14px; font-weight:700; color:#555; margin-bottom:20px; }
+  .modal-pct span { font-size:22px; font-weight:800; color:#1f2a5a; }
+  .modal-btn { width:100%; border:none; background:#1a1a2e; color:white; border-radius:10px; padding:14px; font-size:15px; font-weight:700; cursor:pointer; }
 </style>
 </head>
 <body>
@@ -181,10 +196,30 @@
 
 </div>
 
+<!-- MODAL CARTONES -->
+<div id="modal-cartones">
+  <div class="modal-box">
+    <div class="modal-title">📦 Cartones del día</div>
+    <div class="modal-sub" id="modal-fecha"></div>
+    <div class="modal-stats">
+      <div class="modal-stat">
+        <div class="modal-stat-num verde" id="modal-dejan">—</div>
+        <div class="modal-stat-label">Dejadas</div>
+      </div>
+      <div class="modal-stat">
+        <div class="modal-stat-num rojo" id="modal-retiran">—</div>
+        <div class="modal-stat-label">Retiradas</div>
+      </div>
+    </div>
+    <div class="modal-pct">Porcentaje recuperado: <span id="modal-pct">—</span></div>
+    <button class="modal-btn" onclick="cerrarModalCartones()">Entendido ✓</button>
+  </div>
+</div>
+
 <script>
 const CLOUDINARY_CLOUD  = 'dahri8jfr';
 const CLOUDINARY_PRESET = 'rechazos_unsigned';
-const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbxhi-7OCgqTHbhXAhJkbH3dN_qhVzku9-3bw3BOJJ4ayo9xobkBZUXwJLcZjo2Lx-xe6w/exec';
+const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbxJLadLRJBCF2LbZ1Ckgejn_pvYJpYYmTYT4Xs3WN2YfN2pOZ3ygqhU_iFbZDoTi65UeQ/exec';
 const RESPUESTA_URL     = 'https://reclamos611.github.io/rechazos-app/respuesta_vendedor.html';
 
 const SUPERVISORES = {
@@ -302,6 +337,41 @@ function activarSesion(chofer) {
   document.getElementById('header-user').textContent = '👤 ' + chofer.nombre;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
+  mostrarResumenCartones(chofer);
+}
+
+function mostrarResumenCartones(chofer) {
+  const { fecha } = getFechaHora();
+  document.getElementById('modal-fecha').textContent = chofer.nombre + ' · ' + fecha;
+  document.getElementById('modal-dejan').textContent   = '...';
+  document.getElementById('modal-retiran').textContent = '...';
+  document.getElementById('modal-pct').textContent     = '...';
+  document.getElementById('modal-cartones').classList.add('show');
+
+  const params = new URLSearchParams({
+    accion: 'cartones_resumen',
+    chofer: chofer.nombre
+  });
+
+  fetch(SHEETS_URL + '?' + params.toString())
+    .then(r => r.json())
+    .then(data => {
+      const dejan   = data.dejan   || 0;
+      const retiran = data.retiran || 0;
+      const pct     = dejan > 0 ? Math.round((retiran / dejan) * 100) : 0;
+      document.getElementById('modal-dejan').textContent   = dejan;
+      document.getElementById('modal-retiran').textContent = retiran;
+      document.getElementById('modal-pct').textContent     = pct + '%';
+    })
+    .catch(() => {
+      document.getElementById('modal-dejan').textContent   = '—';
+      document.getElementById('modal-retiran').textContent = '—';
+      document.getElementById('modal-pct').textContent     = 'Sin datos';
+    });
+}
+
+function cerrarModalCartones() {
+  document.getElementById('modal-cartones').classList.remove('show');
 }
 
 function cerrarSesion() {
@@ -322,6 +392,7 @@ function goHome() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
   document.getElementById('main-header').style.display = 'block';
+  if (state.chofer) mostrarResumenCartones(state.chofer);
   document.getElementById('foto-preview').style.display = 'none';
   document.getElementById('foto-status').style.display = 'none';
   document.getElementById('input-foto').value = '';
