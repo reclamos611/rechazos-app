@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<!-- saved from url=(0058)file:///C:/Users/usuario/Downloads/reporte_rechazo_14.html -->
-<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="es">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>611 Rechazos</title>
-<link rel="manifest" href="file:///C:/Users/usuario/Downloads/manifest.json">
+<link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#1a1a2e">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="611 Rechazos">
-<link rel="apple-touch-icon" href="file:///C:/Users/usuario/Downloads/logo.png">
+<link rel="apple-touch-icon" href="logo.png">
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; min-height: 100vh; }
@@ -47,74 +47,121 @@
   .back-link { color: #888; font-size: 13px; cursor: pointer; display: inline-block; margin-bottom: 14px; }
   .back-link:before { content: '← '; }
   .send-info { font-size: 12px; color: #666; text-align: center; margin-top: 6px; padding: 6px; background: #f0f2f5; border-radius: 8px; }
+  #screen-login { position:fixed; inset:0; background: linear-gradient(160deg, #1a1a2e 0%, #0d1020 100%); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:40px 24px; z-index:500; }
+  .login-logo h1 { font-size:28px; font-weight:800; color:white; letter-spacing:2px; text-align:center; }
+  .login-logo p { font-size:12px; color:rgba(255,255,255,0.4); letter-spacing:2px; text-transform:uppercase; margin-top:4px; text-align:center; margin-bottom:32px; }
+  .login-card { background:white; border-radius:16px; padding:24px; width:100%; max-width:360px; box-shadow:0 8px 32px rgba(0,0,0,0.3); }
+  .login-error { background:#fde8e8; color:#c0392b; font-size:13px; padding:10px 14px; border-radius:8px; margin-top:10px; display:none; text-align:center; }
+  .login-error.show { display:block; }
+  .logout-wrap { text-align:center; margin-top:12px; }
+  .logout-btn { background:none; border:none; color:rgba(255,255,255,0.35); font-size:12px; cursor:pointer; text-decoration:underline; }
+  .user-chip { background:#e8f0fe; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; color:#1a1a2e; margin-bottom:4px; display:none; }
+  .user-chip.show { display:block; }
 </style>
 </head>
 <body>
 
-<div class="header">
+<div class="header" id="main-header" style="display:none">
   <h1>📦 SISTEMA DE RECHAZOS</h1>
-  <p>Gestión de rechazos y reclamos</p>
+  <p id="header-user">Gestión de rechazos y reclamos</p>
 </div>
 
 <div class="container">
 
-  <!-- HOME -->
-  <div class="screen active" id="screen-home">
-    <div class="card" style="margin-top:8px;">
-      <div class="step-title">¿Qué tipo de reporte?</div>
-      <button class="home-btn calle" onclick="iniciarFlujo(&#39;calle&#39;)">🚚 Rechazo en Calle</button>
-      <button class="home-btn deposito" onclick="iniciarFlujo(&#39;deposito&#39;)">🏭 Reclamo Depósito</button>
+  <!-- LOGIN -->
+  <div class="screen active" id="screen-login">
+    <div class="login-logo">
+      <h1>611 LOGÍSTICA</h1>
+      <p>Sistema de Rechazos</p>
+    </div>
+    <div class="login-card">
+      <div class="step-title">🔐 Iniciar sesión</div>
+      <input type="text" class="input" id="login-user" placeholder="Usuario (ej: C1)" autocomplete="off" autocapitalize="none">
+      <div class="user-chip" id="user-chip"></div>
+      <input type="password" class="input" id="login-pass" placeholder="Contraseña..." style="margin-top:10px;" onkeydown="if(event.key==='Enter')doLogin()">
+      <div class="login-error" id="login-error">Usuario o contraseña incorrectos.</div>
+      <button class="btn-full" onclick="doLogin()" style="margin-top:14px;">Ingresar →</button>
+    </div>
+    <div class="logout-wrap">
+      <button class="logout-btn" onclick="">¿Olvidaste tu contraseña? Contactá a tu supervisor</button>
     </div>
   </div>
 
-  <!-- CHOFER -->
-  <div class="screen" id="screen-chofer">
-    <div class="card">
-      <span class="back-link" onclick="goHome()">Inicio</span>
-      <div class="step-title">Paso 1 — Identificación</div>
-      <select class="input" id="sel-chofer">
-        <option value="">Seleccioná tu nombre...</option>
-      </select>
+  <!-- HOME -->
+  <div class="screen" id="screen-home">
+    <div class="card" style="margin-top:8px;">
+      <div class="step-title">¿Qué tipo de reporte?</div>
+      <button class="home-btn calle"    onclick="iniciarFlujo('calle')">🚚 Rechazo en Calle</button>
+      <button class="home-btn deposito" onclick="iniciarFlujo('deposito')">🏭 Reclamo Depósito</button>
+      <button class="home-btn" onclick="iniciarFlujo('cartones')" style="background:linear-gradient(135deg,#2e7d32,#388e3c);">📦 Gestión de Cartones</button>
     </div>
-    <button class="btn-full" onclick="goStep(&#39;foto&#39;)">Continuar →</button>
+    <div style="text-align:center;margin-top:8px;">
+      <button onclick="cerrarSesion()" style="background:none;border:none;color:#aaa;font-size:12px;cursor:pointer;text-decoration:underline;">Cerrar sesión</button>
+    </div>
   </div>
+
+  <!-- CHOFER eliminado — se usa login -->
 
   <!-- FOTO -->
   <div class="screen" id="screen-foto">
     <div class="card">
-      <span class="back-link" onclick="goStep(&#39;chofer&#39;)">Atrás</span>
-      <div class="step-title">Paso 2 — Foto del local</div>
-      <button class="btn-full" onclick="document.getElementById(&#39;input-foto&#39;).click()" style="background:#555;">📷 Sacar / Elegir Foto</button>
+      <span class="back-link" onclick="goHome()">Atrás</span>
+      <div class="step-title">Paso 1 — Foto del local</div>
+      <button class="btn-full" onclick="document.getElementById('input-foto').click()" style="background:#555;">📷 Sacar / Elegir Foto</button>
       <input type="file" id="input-foto" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(this)">
       <img id="foto-preview" class="foto-preview">
       <div id="foto-status" class="foto-status"></div>
     </div>
-    <button class="btn-full" id="btn-foto-next" onclick="goStep(&#39;motivo&#39;)" disabled="">Continuar →</button>
+    <button class="btn-full" id="btn-foto-next" onclick="goStep('motivo')" disabled>Continuar →</button>
   </div>
 
   <!-- MOTIVO -->
   <div class="screen" id="screen-motivo">
     <div class="card">
-      <span class="back-link" onclick="goStep(&#39;foto&#39;)">Atrás</span>
-      <div class="step-title">Paso 3 — Motivo</div>
+      <span class="back-link" onclick="goStep('foto')">Atrás</span>
+      <div class="step-title">Paso 2 — Motivo</div>
       <div class="btn-grid" id="motivos-grid"></div>
       <div style="margin-top:12px;">
         <textarea class="input" id="obs-input" placeholder="Observación (opcional)..." rows="2"></textarea>
       </div>
     </div>
-    <button class="btn-full" id="btn-motivo-next" disabled="">Continuar →</button>
+    <button class="btn-full" id="btn-motivo-next" disabled>Continuar →</button>
   </div>
 
   <!-- VENDEDOR (solo calle) -->
   <div class="screen" id="screen-vendedor">
     <div class="card">
-      <span class="back-link" onclick="goStep(&#39;motivo&#39;)">Atrás</span>
-      <div class="step-title">Paso 4 — Vendedor responsable</div>
+      <span class="back-link" onclick="goStep('motivo')">Atrás</span>
+      <div class="step-title">Paso 3 — Vendedor responsable</div>
       <select class="input" id="sel-vendedor">
         <option value="">Seleccioná el vendedor...</option>
       </select>
     </div>
-    <button class="btn-full" onclick="goStep(&#39;envio&#39;)">Continuar →</button>
+    <button class="btn-full" onclick="goStep('envio')">Continuar →</button>
+  </div>
+
+  <!-- CARTONES -->
+  <div class="screen" id="screen-cartones">
+    <div class="card" style="margin-top:8px;">
+      <span class="back-link" onclick="goHome()">Inicio</span>
+      <div class="step-title">Gestión de Cartones</div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Número de Cliente</label>
+        <input type="text" class="input" id="cartones-cliente" placeholder="Ingresá el número de cliente...">
+      </div>
+      <div style="margin-bottom:12px;">
+        <label style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Cajas que Dejás</label>
+        <input type="number" class="input" id="cartones-dejan" placeholder="0" min="0">
+      </div>
+      <div style="margin-bottom:4px;">
+        <label style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Cajas que Retirás</label>
+        <input type="number" class="input" id="cartones-retiran" placeholder="0" min="0">
+      </div>
+    </div>
+      <div id="cartones-status" class="foto-status" style="margin-top:10px;"></div>
+      <button class="btn-full" style="background:#2e7d32;margin-top:12px;" onclick="guardarCartones()">✓ Guardar en Planilla</button>
+      <button class="btn-full" onclick="goHome()" style="background:#888;margin-top:8px;">🏠 Nuevo reporte</button>
+    </div>
   </div>
 
   <!-- ENVÍO -->
@@ -137,7 +184,7 @@
 <script>
 const CLOUDINARY_CLOUD  = 'dahri8jfr';
 const CLOUDINARY_PRESET = 'rechazos_unsigned';
-const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbwQaUERGbHK3IUABqTAbqgcxM4VkbhpBa9LszuguSXYyJ91d7pSYANcjgx0al05bqNbMQ/exec';
+const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbxhi-7OCgqTHbhXAhJkbH3dN_qhVzku9-3bw3BOJJ4ayo9xobkBZUXwJLcZjo2Lx-xe6w/exec';
 const RESPUESTA_URL     = 'https://reclamos611.github.io/rechazos-app/respuesta_vendedor.html';
 
 const SUPERVISORES = {
@@ -194,9 +241,8 @@ const VENDEDORES = [
   {codigo:'V42',nombre:'RESTIVO VALERIA CARINA',           wsp:'543516800868',sup:'sebastian'},
   {codigo:'V43',nombre:'CUJAR ALEXANDER GREGOREVICHS',     wsp:'543536562443',sup:'sebastian'},
   {codigo:'V44',nombre:'BERNAHOLA JORGE AGUSTIN',          wsp:'543513638356',sup:'sebastian'},
-  {codigo:'V45',nombre:'ROMERO PARAVICINI DIANA DE JESUS', wsp:'543536250642',sup:'natalia'},
-  {codigo:'V46',nombre:'OCHOA ROXANA DEL VALLE',           wsp:'543516134408',sup:'sebastian'},
-  {codigo:'V47',nombre:'CACERES YANINA',                   wsp:'543515639947',sup:'sebastian'},
+  {codigo:'V46',nombre:'ROMERO PARAVICINI DIANA DE JESUS', wsp:'543536250642',sup:'natalia'},
+  {codigo:'V47',nombre:'OCHOA ROXANA DEL VALLE',           wsp:'543516134408',sup:'sebastian'},
   {codigo:'V48',nombre:'SALDE MARCELA ANTONIA',            wsp:'543534250641',sup:'sebastian'},
   {codigo:'V49',nombre:'MOREIRA AIRALDI TOBIAS URIEL',     wsp:'543517478111',sup:'sebastian'},
   {codigo:'V51',nombre:'GONZALEZ MARIA CANDELARIA',        wsp:'543512847999',sup:'claudio'},
@@ -209,13 +255,63 @@ const VENDEDORES = [
   {codigo:'V58',nombre:'GONZALEZ MARCELA LUCIANA',           wsp:'543536562445',sup:'sebastian'},
   {codigo:'V59',nombre:'AVENDAÑO SERGIO ALEJANDRO',          wsp:'543515645488',sup:'natalia'},
   {codigo:'V61',nombre:'PACHECO RODRIGO RAMON',              wsp:'543513461430',sup:'natalia'},
-  {codigo:'V62',nombre:'PAEZ MIGUEL SEBASTIAN',              wsp:'543534250637',sup:'natalia'},
+  {codigo:'V62',nombre:'PAEZ MIGUEL SEBASTIAN',              wsp:'543534250644',sup:'natalia'},
   {codigo:'V63',nombre:'MIRANDA MARIANA ROCIO',              wsp:'543517346777',sup:'natalia'},
   {codigo:'V64',nombre:'GONZALEZ FRANCO MAXIMILIANO',        wsp:'543513938427',sup:'natalia'},
   {codigo:'V65',nombre:'SANCHEZ JULIAN DAVID',               wsp:'543516078259',sup:'natalia'}
 ];
 
 let state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'' };
+
+// ── LOGIN ──────────────────────────────────────────────────────────────────
+window.addEventListener('load', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('service-worker.js').catch(() => {});
+  }
+  // Auto-login si hay sesión guardada
+  const saved = localStorage.getItem('chofer611');
+  if (saved) {
+    try {
+      const chofer = JSON.parse(saved);
+      state.chofer = chofer;
+      activarSesion(chofer);
+    } catch(e) { localStorage.removeItem('chofer611'); }
+  }
+});
+
+function doLogin() {
+  const usuario = document.getElementById('login-user').value.trim().toUpperCase();
+  const pass    = document.getElementById('login-pass').value.trim().toLowerCase();
+  const errEl   = document.getElementById('login-error');
+
+  const chofer = CHOFERES.find(c => c.id.toUpperCase() === usuario);
+  if (!chofer) { errEl.classList.add('show'); return; }
+
+  const passEsperado = chofer.id.toLowerCase() + chofer.id.toLowerCase();
+  if (pass !== passEsperado) { errEl.classList.add('show'); return; }
+
+  errEl.classList.remove('show');
+  localStorage.setItem('chofer611', JSON.stringify(chofer));
+  state.chofer = chofer;
+  activarSesion(chofer);
+}
+
+function activarSesion(chofer) {
+  document.getElementById('screen-login').style.display = 'none';
+  document.getElementById('main-header').style.display = 'block';
+  document.getElementById('header-user').textContent = '👤 ' + chofer.nombre;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-home').classList.add('active');
+}
+
+function cerrarSesion() {
+  localStorage.removeItem('chofer611');
+  state.chofer = null;
+  document.getElementById('login-user').value = '';
+  document.getElementById('login-pass').value = '';
+  document.getElementById('main-header').style.display = 'none';
+  document.getElementById('screen-login').style.display = 'flex';
+}
 
 function generarID() {
   return Date.now().toString(36).toUpperCase() + Math.random().toString(36).substr(2,4).toUpperCase();
@@ -225,6 +321,7 @@ function goHome() {
   state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'' };
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
+  document.getElementById('main-header').style.display = 'block';
   document.getElementById('foto-preview').style.display = 'none';
   document.getElementById('foto-status').style.display = 'none';
   document.getElementById('input-foto').value = '';
@@ -238,15 +335,16 @@ function iniciarFlujo(tipo) {
   state.tipo = tipo;
   state.id   = generarID();
 
-  // Choferes
-  const selC = document.getElementById('sel-chofer');
-  selC.innerHTML = '<option value="">Seleccioná tu nombre...</option>';
-  CHOFERES.forEach(c => {
-    const o = document.createElement('option');
-    o.value = c.id;
-    o.textContent = c.id + ' - ' + c.nombre;
-    selC.appendChild(o);
-  });
+  // Cartones — ir directo a pantalla cartones
+  if (tipo === 'cartones') {
+    document.getElementById('cartones-cliente').value = '';
+    document.getElementById('cartones-dejan').value = '';
+    document.getElementById('cartones-retiran').value = '';
+    document.getElementById('cartones-status').style.display = 'none';
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-cartones').classList.add('active');
+    return;
+  }
 
   // Vendedores
   const selV = document.getElementById('sel-vendedor');
@@ -277,14 +375,12 @@ function iniciarFlujo(tipo) {
     grid.appendChild(b);
   });
 
-  goStep('chofer');
+  goStep('foto');
 }
 
 function goStep(step) {
   if (step === 'foto') {
-    const sel = document.getElementById('sel-chofer');
-    if (!sel.value) { alert('Seleccioná tu nombre'); return; }
-    state.chofer = CHOFERES.find(c => c.id === sel.value);
+    if (!state.chofer) { alert('Sesión no iniciada'); return; }
   }
 
   if (step === 'motivo') {
@@ -394,12 +490,7 @@ function guardarSheets(fecha, hora) {
   img.src = SHEETS_URL + '?' + params.toString();
 }
 
-// ── PWA SERVICE WORKER ────────────────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('service-worker.js').catch(() => {});
-  });
-}
+
 
 function enviarVendedor() {
   if (state.tipo === 'deposito') return; // deposito no tiene vendedor
@@ -450,7 +541,44 @@ function enviarSupervisor() {
     window.open('https://wa.me/' + sup.wsp + '?text=' + encodeURIComponent(msg), '_blank');
   }
 }
+
+function guardarCartones() {
+  const cliente  = document.getElementById('cartones-cliente').value.trim();
+  const dejan    = document.getElementById('cartones-dejan').value.trim();
+  const retiran  = document.getElementById('cartones-retiran').value.trim();
+  const statusEl = document.getElementById('cartones-status');
+
+  if (!cliente) {
+    statusEl.className = 'foto-status err';
+    statusEl.textContent = '⚠ Ingresá el número de cliente';
+    return;
+  }
+
+  const { fecha, hora } = getFechaHora();
+  statusEl.className = 'foto-status loading';
+  statusEl.textContent = '⏳ Guardando en planilla...';
+
+  const params = new URLSearchParams({
+    accion:  'cartones',
+    id:      state.id,
+    fecha, hora,
+    chofer:  state.chofer ? state.chofer.nombre : '',
+    cliente: cliente,
+    dejan:   dejan   || '0',
+    retiran: retiran || '0'
+  });
+
+  const img = new Image();
+  img.onload = img.onerror = () => {
+    // Limpiar campos y volver al home
+    document.getElementById('cartones-cliente').value = '';
+    document.getElementById('cartones-dejan').value   = '';
+    document.getElementById('cartones-retiran').value = '';
+    statusEl.style.display = 'none';
+    goHome();
+  };
+  img.src = SHEETS_URL + '?' + params.toString();
+}
 </script>
-
-
-</body></html>
+</body>
+</html>
