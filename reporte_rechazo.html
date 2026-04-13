@@ -57,21 +57,7 @@
   .logout-btn { background:none; border:none; color:rgba(255,255,255,0.35); font-size:12px; cursor:pointer; text-decoration:underline; }
   .user-chip { background:#e8f0fe; border-radius:8px; padding:8px 12px; font-size:13px; font-weight:600; color:#1a1a2e; margin-bottom:4px; display:none; }
   .user-chip.show { display:block; }
-  /* MODAL CARTONES */
-  #modal-cartones { position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:400; display:none; align-items:center; justify-content:center; padding:24px; }
-  #modal-cartones.show { display:flex; }
-  .modal-box { background:white; border-radius:18px; padding:24px; width:100%; max-width:340px; box-shadow:0 8px 32px rgba(0,0,0,0.3); text-align:center; }
-  .modal-title { font-family:'Segoe UI',sans-serif; font-size:16px; font-weight:800; color:#1a1a2e; margin-bottom:4px; }
-  .modal-sub { font-size:12px; color:#888; margin-bottom:20px; }
-  .modal-stats { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
-  .modal-stat { background:#f0f2f5; border-radius:12px; padding:14px 10px; }
-  .modal-stat-num { font-size:32px; font-weight:800; color:#1a1a2e; line-height:1; }
-  .modal-stat-num.verde { color:#2e7d32; }
-  .modal-stat-num.rojo { color:#c0392b; }
-  .modal-stat-label { font-size:11px; color:#888; margin-top:4px; text-transform:uppercase; letter-spacing:1px; }
-  .modal-pct { font-size:14px; font-weight:700; color:#555; margin-bottom:20px; }
-  .modal-pct span { font-size:22px; font-weight:800; color:#1f2a5a; }
-  .modal-btn { width:100%; border:none; background:#1a1a2e; color:white; border-radius:10px; padding:14px; font-size:15px; font-weight:700; cursor:pointer; }
+
 </style>
 </head>
 <body>
@@ -196,26 +182,6 @@
 
 </div>
 
-<!-- MODAL CARTONES -->
-<div id="modal-cartones">
-  <div class="modal-box">
-    <div class="modal-title">📦 Cartones del día</div>
-    <div class="modal-sub" id="modal-fecha"></div>
-    <div class="modal-stats">
-      <div class="modal-stat">
-        <div class="modal-stat-num verde" id="modal-dejan">—</div>
-        <div class="modal-stat-label">Dejadas</div>
-      </div>
-      <div class="modal-stat">
-        <div class="modal-stat-num rojo" id="modal-retiran">—</div>
-        <div class="modal-stat-label">Retiradas</div>
-      </div>
-    </div>
-    <div class="modal-pct">Porcentaje recuperado: <span id="modal-pct">—</span></div>
-    <button class="modal-btn" onclick="cerrarModalCartones()">Entendido ✓</button>
-  </div>
-</div>
-
 <script>
 const CLOUDINARY_CLOUD  = 'dahri8jfr';
 const CLOUDINARY_PRESET = 'rechazos_unsigned';
@@ -238,17 +204,16 @@ const MOTIVOS_CALLE = [
 const MOTIVOS_DEPOSITO = ['Envases Roto/Sucio','Mal Armado','Sin Stock'];
 
 const CHOFERES = [
-  {id:'C1',  nombre:'GUZMAN DIEGO NORBERTO',              cel:'3517586140'},
-  {id:'C2',  nombre:'CARO MAXIMILIANO ALBERTO',           cel:'3517689431'},
-  {id:'C3',  nombre:'RICAPA PAREDES JOSE ANTONIO',        cel:'3518122270'},
-  {id:'C4',  nombre:'AVALOS GOMEZ RODRIGO SEBASTIAN',     cel:'3517505787'},
-  {id:'C5',  nombre:'OYOLA GASTON AGUSTIN',               cel:'3517504946'},
-  {id:'C6',  nombre:'LUJAN LUCAS',                        cel:'3517544656'},
-  {id:'C7',  nombre:'JUAREZ LUIS ENRIQUE',                cel:'3517035245'},
-  {id:'C8',  nombre:'MOLINA JORGE GABRIEL',               cel:'3517038716'},
-  {id:'C9',  nombre:'RAFAELLI DIEGO DANIEL',              cel:'3518075163'},
-  {id:'C10', nombre:'SUAREZ TOBIAS EMIR',                 cel:'3517037853'},
-  {id:'C11', nombre:'MARTINEZ PEREZ JORGE LEANDRO',       cel:'3518101474'},
+  {id:'C1',  nombre:'GUZMAN DIEGO NORBERTO',              cel:'3515477459'},
+  {id:'C2',  nombre:'CARO MAXIMILIANO ALBERTO',           cel:'3515149870'},
+  {id:'C3',  nombre:'RICAPA PAREDES JOSE ANTONIO',        cel:'3515155580'},
+  {id:'C4',  nombre:'AVALOS GOMEZ RODRIGO SEBASTIAN',     cel:'3516352595'},
+  {id:'C5',  nombre:'OYOLA GASTON AGUSTIN',               cel:'3515780862'},
+  {id:'C6',  nombre:'LUJAN LUCAS',                        cel:'3518018476'},
+  {id:'C7',  nombre:'JUAREZ LUIS ENRIQUE',                cel:'3515337280'},
+  {id:'C8',  nombre:'MOLINA JORGE GABRIEL',               cel:'3515257899'},
+  {id:'C9',  nombre:'RAFAELLI DIEGO DANIEL',              cel:'3515179964'},
+  {id:'C10', nombre:'SUAREZ TOBIAS EMIR',                 cel:'3515816469'},
   {id:'C251',nombre:'GONZALEZ CECILIA GUADALUPE',         cel:'3515384303'},
   {id:'C252',nombre:'BELEN EMILIANO AGUSTIN',             cel:'3513434601'},
   {id:'C253',nombre:'GUIRAO LUIS ANTONIO',                cel:'3512112002'},
@@ -338,42 +303,8 @@ function activarSesion(chofer) {
   document.getElementById('header-user').textContent = '👤 ' + chofer.nombre;
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
-  mostrarResumenCartones(chofer);
 }
 
-function mostrarResumenCartones(chofer) {
-  const { fecha } = getFechaHora();
-  document.getElementById('modal-fecha').textContent = chofer.nombre + ' · ' + fecha;
-  document.getElementById('modal-dejan').textContent   = '...';
-  document.getElementById('modal-retiran').textContent = '...';
-  document.getElementById('modal-pct').textContent     = '...';
-  document.getElementById('modal-cartones').classList.add('show');
-
-  const params = new URLSearchParams({
-    accion: 'cartones_resumen',
-    chofer: chofer.nombre
-  });
-
-  fetch(SHEETS_URL + '?' + params.toString())
-    .then(r => r.json())
-    .then(data => {
-      const dejan   = data.dejan   || 0;
-      const retiran = data.retiran || 0;
-      const pct     = dejan > 0 ? Math.round((retiran / dejan) * 100) : 0;
-      document.getElementById('modal-dejan').textContent   = dejan;
-      document.getElementById('modal-retiran').textContent = retiran;
-      document.getElementById('modal-pct').textContent     = pct + '%';
-    })
-    .catch(() => {
-      document.getElementById('modal-dejan').textContent   = '—';
-      document.getElementById('modal-retiran').textContent = '—';
-      document.getElementById('modal-pct').textContent     = 'Sin datos';
-    });
-}
-
-function cerrarModalCartones() {
-  document.getElementById('modal-cartones').classList.remove('show');
-}
 
 function cerrarSesion() {
   localStorage.removeItem('chofer611');
@@ -393,7 +324,6 @@ function goHome() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-home').classList.add('active');
   document.getElementById('main-header').style.display = 'block';
-  if (state.chofer) mostrarResumenCartones(state.chofer);
   document.getElementById('foto-preview').style.display = 'none';
   document.getElementById('foto-status').style.display = 'none';
   document.getElementById('input-foto').value = '';
@@ -452,7 +382,11 @@ function iniciarFlujo(tipo) {
 
 function goStep(step) {
   if (step === 'foto') {
-    if (!state.chofer) { alert('Sesión no iniciada'); return; }
+    if (!state.chofer) {
+      const saved = localStorage.getItem('chofer611');
+      if (saved) { state.chofer = JSON.parse(saved); }
+      else { alert('Sesión no iniciada'); return; }
+    }
   }
 
   if (step === 'motivo') {
@@ -634,7 +568,7 @@ function guardarCartones() {
     accion:  'cartones',
     id:      state.id,
     fecha, hora,
-    chofer:  state.chofer ? state.chofer.nombre : '',
+    chofer:  (() => { if (!state.chofer) { const s = localStorage.getItem('chofer611'); if (s) state.chofer = JSON.parse(s); } return state.chofer ? state.chofer.nombre : ''; })(),
     cliente: cliente,
     dejan:   dejan   || '0',
     retiran: retiran || '0'
