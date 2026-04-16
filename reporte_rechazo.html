@@ -93,7 +93,6 @@
     <div class="card" style="margin-top:8px;">
       <div class="step-title">¿Qué tipo de reporte?</div>
       <button class="home-btn calle"    onclick="iniciarFlujo('calle')">🚚 Rechazo en Calle</button>
-      <button class="home-btn deposito" onclick="iniciarFlujo('deposito')">🏭 Reclamo Depósito</button>
       <button class="home-btn" onclick="iniciarFlujo('cartones')" style="background:linear-gradient(135deg,#2e7d32,#388e3c);">📦 Gestión de Cartones</button>
     </div>
     <div style="text-align:center;margin-top:8px;">
@@ -103,15 +102,19 @@
 
   <!-- CHOFER eliminado — se usa login -->
 
-  <!-- FOTO -->
+  <!-- CLIENTE + FOTO -->
   <div class="screen" id="screen-foto">
     <div class="card">
       <span class="back-link" onclick="goHome()">Atrás</span>
-      <div class="step-title">Paso 1 — Foto del local</div>
-      <button class="btn-full" onclick="document.getElementById('input-foto').click()" style="background:#555;">📷 Sacar / Elegir Foto</button>
-      <input type="file" id="input-foto" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(this)">
-      <img id="foto-preview" class="foto-preview">
-      <div id="foto-status" class="foto-status"></div>
+      <div class="step-title">Paso 1 — Cliente y Foto</div>
+      <label style="font-size:13px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:6px;">Número de Cliente</label>
+      <input type="text" class="input" id="nro-cliente" placeholder="Ingresá el número de cliente...">
+      <div style="margin-top:14px;">
+        <button class="btn-full" onclick="document.getElementById('input-foto').click()" style="background:#555;">📷 Sacar / Elegir Foto</button>
+        <input type="file" id="input-foto" accept="image/*" capture="environment" style="display:none" onchange="handleFoto(this)">
+        <img id="foto-preview" class="foto-preview">
+        <div id="foto-status" class="foto-status"></div>
+      </div>
     </div>
     <button class="btn-full" id="btn-foto-next" onclick="goStep('motivo')" disabled>Continuar →</button>
   </div>
@@ -185,7 +188,7 @@
 <script>
 const CLOUDINARY_CLOUD  = 'dahri8jfr';
 const CLOUDINARY_PRESET = 'rechazos_unsigned';
-const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbwN0WHqJx5Fh72qJs8zrzS1CGp5lFL8wVD6rtGPWhSb2izReYzBnoo1yYnz65b5UzvGeQ/exec';
+const SHEETS_URL        = 'https://script.google.com/macros/s/AKfycbwgxUvHpaTwR-qLpt-CpgWQM4vE-xZ2dpm4_Ojc9BRokORGXEo4tmhUIgXgyRmYuwc42w/exec';
 const RESPUESTA_URL     = 'https://reclamos611.github.io/rechazos-app/respuesta_vendedor.html';
 
 const SUPERVISORES = {
@@ -201,7 +204,6 @@ const MOTIVOS_CALLE = [
   'Mal Facturado','No está el dueño','No hizo pedido',
   'Sin Dinero','Sin Stock','Zona peligrosa o camino malo'
 ];
-const MOTIVOS_DEPOSITO = ['Envases Roto/Sucio','Mal Armado','Sin Stock'];
 
 const CHOFERES = [
   {id:'C1',  nombre:'GUZMAN DIEGO NORBERTO',              cel:'3515477459'},
@@ -242,30 +244,30 @@ const VENDEDORES = [
   {codigo:'V39',nombre:'MERLO RODOLFO SEBASTIAN',          wsp:'543546519096',sup:'claudio'},
   {codigo:'V41',nombre:'CISTERNA DIEGO SEBASTIAN',         wsp:'543513660165',sup:'natalia'},
   {codigo:'V42',nombre:'RESTIVO VALERIA CARINA',           wsp:'543516800868',sup:'sebastian'},
-  {codigo:'V43',nombre:'CUJAR ALEXANDER GREGOREVICHS',     wsp:'543536562443',sup:'sebastian'},
+  {codigo:'V43',nombre:'RUEDA CUJAR ALEXANDER GREGOREVICHS',wsp:'543536562443',sup:'sebastian'},
   {codigo:'V44',nombre:'BERNAHOLA JORGE AGUSTIN',          wsp:'543513638356',sup:'sebastian'},
-  {codigo:'V45',nombre:'ROMERO PARAVICINI DIANA DE JESUS', wsp:'543536250642',sup:'natalia'},
+  {codigo:'V45',nombre:'ROMERO PARAVICINI DIANA DE JESUS', wsp:'543534250642',sup:'natalia'},
   {codigo:'V46',nombre:'OCHOA ROXANA DEL VALLE',           wsp:'543516134408',sup:'sebastian'},
-  {codigo:'V47',nombre:'caceres yanina',                   wsp:'543515639947',sup:'sebastian'},
+  {codigo:'V47',nombre:'CACERES YANINA BELEN',             wsp:'543515639947',sup:'sebastian'},
   {codigo:'V48',nombre:'SALDE MARCELA ANTONIA',            wsp:'543534250641',sup:'sebastian'},
   {codigo:'V49',nombre:'MOREIRA AIRALDI TOBIAS URIEL',     wsp:'543517478111',sup:'sebastian'},
   {codigo:'V51',nombre:'GONZALEZ MARIA CANDELARIA',        wsp:'543512847999',sup:'claudio'},
   {codigo:'V52',nombre:'MARTINEZ DIEGO MATIAS',            wsp:'543536562554',sup:'natalia'},
   {codigo:'V53',nombre:'CARRIZO EZEQUIEL ALEJANDRO',       wsp:'543516796032',sup:'natalia'},
-  {codigo:'V54',nombre:'MORENO LOBO JAVIER',               wsp:'543512068535',sup:'sebastian'},
+  {codigo:'V54',nombre:'MORENO LOBO JOHAN JAVIER',         wsp:'543512068535',sup:'sebastian'},
   {codigo:'V55',nombre:'PULIDO LARA EFRAIM JOSE',          wsp:'543516796124',sup:'natalia'},
   {codigo:'V56',nombre:'RIVARA LORENZO',                   wsp:'543534250643',sup:'natalia'},
-  {codigo:'V57',nombre:'DIAZ OMAR EDUARDO',                  wsp:'543516092927',sup:'natalia'},
-  {codigo:'V58',nombre:'GONZALEZ MARCELA LUCIANA',           wsp:'543536562445',sup:'sebastian'},
-  {codigo:'V59',nombre:'AVENDAÑO SERGIO ALEJANDRO',          wsp:'543515645488',sup:'natalia'},
-  {codigo:'V61',nombre:'PACHECO RODRIGO RAMON',              wsp:'543513461430',sup:'natalia'},
-  {codigo:'V62',nombre:'PAEZ MIGUEL SEBASTIAN',              wsp:'543534250644',sup:'natalia'},
-  {codigo:'V63',nombre:'MIRANDA MARIANA ROCIO',              wsp:'543517346777',sup:'natalia'},
-  {codigo:'V64',nombre:'GONZALEZ FRANCO MAXIMILIANO',        wsp:'543513938427',sup:'natalia'},
-  {codigo:'V65',nombre:'SANCHEZ JULIAN DAVID',               wsp:'543516078259',sup:'natalia'}
+  {codigo:'V57',nombre:'DIAZ OMAR EDUARDO',                wsp:'543516092927',sup:'natalia'},
+  {codigo:'V58',nombre:'GONZALEZ MARCELA LUCIANA',         wsp:'543536562445',sup:'sebastian'},
+  {codigo:'V59',nombre:'AVENDAÑO SERGIO ALEJANDRO',        wsp:'543515645488',sup:'natalia'},
+  {codigo:'V61',nombre:'PACHECO RODRIGO RAMON',            wsp:'543513461430',sup:'natalia'},
+  {codigo:'V62',nombre:'PAEZ MIGUEL SEBASTIAN',            wsp:'543534250644',sup:'natalia'},
+  {codigo:'V63',nombre:'MIRANDA MARIANA ROCIO',            wsp:'543517346777',sup:'natalia'},
+  {codigo:'V64',nombre:'GONZALEZ FRANCO MAXIMILIANO',      wsp:'543513938427',sup:'natalia'},
+  {codigo:'V65',nombre:'SANCHEZ JULIAN DAVID',             wsp:'543516078259',sup:'natalia'}
 ];
 
-let state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'' };
+let state = { tipo:'', chofer:null, fotoUrl:'', motivo:'', obs:'', vendedor:null, id:'', cliente:'' };
 
 // ── LOGIN ──────────────────────────────────────────────────────────────────
 window.addEventListener('load', () => {
@@ -281,7 +283,8 @@ window.addEventListener('load', () => {
       activarSesion(chofer);
     } catch(e) { localStorage.removeItem('chofer611'); }
   }
-});
+}
+);
 
 function doLogin() {
   const usuario = document.getElementById('login-user').value.trim().toUpperCase();
@@ -334,6 +337,8 @@ function goHome() {
   document.getElementById('obs-input').value = '';
   document.getElementById('btn-motivo-next').disabled = true;
   document.querySelectorAll('#motivos-grid .btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('nro-cliente').value = '';
+  state.cliente = '';
 }
 
 function iniciarFlujo(tipo) {
@@ -362,11 +367,10 @@ function iniciarFlujo(tipo) {
   });
 
   // Motivos según tipo
-  const motivos = tipo === 'calle' ? MOTIVOS_CALLE : MOTIVOS_DEPOSITO;
+  const motivos = MOTIVOS_CALLE;
   const grid = document.getElementById('motivos-grid');
   grid.innerHTML = '';
-  // depósito tiene pocos motivos, 1 columna
-  grid.style.gridTemplateColumns = motivos.length <= 4 ? '1fr' : '1fr 1fr';
+  grid.style.gridTemplateColumns = '1fr 1fr';
   motivos.forEach(m => {
     const b = document.createElement('button');
     b.className = 'btn';
@@ -390,6 +394,11 @@ function goStep(step) {
       if (saved) { state.chofer = JSON.parse(saved); }
       else { alert('Sesión no iniciada'); return; }
     }
+  }
+  if (step === 'motivo') {
+    const cli = document.getElementById('nro-cliente').value.trim();
+    if (!cli) { alert('Ingresá el número de cliente'); return; }
+    state.cliente = cli;
   }
 
   if (step === 'motivo') {
@@ -466,8 +475,9 @@ function armarEnvio() {
   state.obs = document.getElementById('obs-input').value;
 
   let html = `<strong>ID:</strong> ${state.id}<br>
-<strong>Tipo:</strong> ${state.tipo === 'calle' ? '🚚 Rechazo en Calle' : '🏭 Reclamo Depósito'}<br>
+<strong>Tipo:</strong> 🚚 Rechazo en Calle<br>
 <strong>Chofer:</strong> ${state.chofer.id} - ${state.chofer.nombre}<br>
+<strong>Cliente:</strong> ${state.cliente}<br>
 <strong>Fecha:</strong> ${fecha} ${hora}<br>
 <strong>Motivo:</strong> ${state.motivo}<br>`;
   if (state.obs)      html += `<strong>Observación:</strong> ${state.obs}<br>`;
@@ -484,8 +494,9 @@ function guardarSheets(fecha, hora) {
   statusEl.textContent = '⏳ Guardando en planilla...';
   const params = new URLSearchParams({
     id: state.id, fecha, hora,
-    tipo:        state.tipo === 'calle' ? 'Rechazo Calle' : 'Reclamo Deposito',
+    tipo:        'Rechazo Calle',
     chofer:      state.chofer.nombre,
+    cliente:     state.cliente || '',
     vendedor:    state.vendedor ? state.vendedor.nombre : '',
     motivo:      state.motivo,
     observacion: state.obs,
@@ -517,6 +528,7 @@ function enviarVendedor() {
   const msg = `🚚 *RECHAZO DE ENTREGA*\n\n` +
     `🆔 ID: ${state.id}\n` +
     `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
+    `🏪 Cliente: ${state.cliente}\n` +
     `🕐 ${fecha} ${hora}\n` +
     `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
     `\n\n👉 *Respondé acá:* ${respLink}\n\n_Tocá el link para gestionar el rechazo._`;
@@ -528,16 +540,8 @@ function enviarSupervisor() {
   const fotoLinea = state.fotoUrl ? `\n📸 Foto: ${state.fotoUrl}` : '';
   const obsLinea  = state.obs     ? `\n📝 Obs: ${state.obs}`      : '';
 
-  if (state.tipo === 'deposito') {
-    const msg = `🏭 *RECLAMO DEPÓSITO*\n\n` +
-      `🆔 ID: ${state.id}\n` +
-      `👤 Chofer: ${state.chofer.id} - ${state.chofer.nombre}\n` +
-      `🕐 ${fecha} ${hora}\n` +
-      `❌ Motivo: ${state.motivo}` + obsLinea + fotoLinea +
-      `\n\n_Este es un aviso automático._`;
-    window.open('https://wa.me/' + SUP_DEPOSITO.wsp + '?text=' + encodeURIComponent(msg), '_blank');
-  } else {
-    if (!state.vendedor) return;
+  if (!state.vendedor) return;
+  {
     const sup = SUPERVISORES[state.vendedor.sup];
     if (!sup) return;
     const msg = `👔 *AVISO SUPERVISOR — RECHAZO EN CALLE*\n\n` +
