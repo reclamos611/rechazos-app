@@ -116,7 +116,7 @@
         <div id="foto-status" class="foto-status"></div>
       </div>
     </div>
-    <button class="btn-full" id="btn-foto-next" onclick="goStep('motivo')" disabled>Continuar →</button>
+    <button class="btn-full" id="btn-foto-next" onclick="goStep('motivo')">Continuar →</button>
   </div>
 
   <!-- MOTIVO -->
@@ -333,7 +333,7 @@ function goHome() {
   document.getElementById('foto-preview').style.display = 'none';
   document.getElementById('foto-status').style.display = 'none';
   document.getElementById('input-foto').value = '';
-  document.getElementById('btn-foto-next').disabled = true;
+  // foto uploading
   document.getElementById('obs-input').value = '';
   document.getElementById('btn-motivo-next').disabled = true;
   document.querySelectorAll('#motivos-grid .btn').forEach(b => b.classList.remove('selected'));
@@ -397,7 +397,12 @@ function goStep(step) {
   }
   if (step === 'motivo') {
     const cli = document.getElementById('nro-cliente').value.trim();
-    if (!cli) { alert('Ingresá el número de cliente'); return; }
+    if (!cli) {
+      document.getElementById('nro-cliente').style.borderColor = '#e53935';
+      document.getElementById('nro-cliente').focus();
+      return;
+    }
+    document.getElementById('nro-cliente').style.borderColor = '';
     state.cliente = cli;
   }
 
@@ -441,7 +446,7 @@ async function handleFoto(input) {
   preview.style.display = 'block';
   status.className = 'foto-status loading';
   status.textContent = '⏳ Subiendo foto...';
-  document.getElementById('btn-foto-next').disabled = true;
+  // foto uploading
   try {
     const fd = new FormData();
     fd.append('file', file);
@@ -452,13 +457,11 @@ async function handleFoto(input) {
       state.fotoUrl = data.secure_url;
       status.className = 'foto-status ok';
       status.textContent = '✓ Foto subida correctamente';
-      document.getElementById('btn-foto-next').disabled = false;
     } else { throw new Error(); }
   } catch {
     status.className = 'foto-status err';
     status.textContent = '⚠ No se pudo subir la foto. Podés continuar igual.';
     state.fotoUrl = '';
-    document.getElementById('btn-foto-next').disabled = false;
   }
 }
 
