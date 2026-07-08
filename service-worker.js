@@ -1,8 +1,8 @@
-const CACHE_VERSION = 'v10'; // ← cambiá este número cada vez que subas cambios
+const CACHE_VERSION = 'v11'; // ← cambiá este número cada vez que subas cambios
 const CACHE_NAME = '611-rechazos-' + CACHE_VERSION;
 
 const ASSETS = [
-  '/rechazos-app/reporte_rechazo.html',
+  '/rechazos-app/index.html',
   '/rechazos-app/respuesta_vendedor.html',
   '/rechazos-app/manifest.json',
   '/rechazos-app/logo.png'
@@ -14,7 +14,7 @@ self.addEventListener('install', e => {
     caches.open(CACHE_NAME).then(cache =>
       cache.addAll(ASSETS).catch(() =>
         cache.addAll([
-          '/rechazos-app/reporte_rechazo.html',
+          '/rechazos-app/index.html',
           '/rechazos-app/respuesta_vendedor.html'
         ])
       )
@@ -73,7 +73,7 @@ self.addEventListener('fetch', e => {
           caches.open(CACHE_NAME).then(c => c.put(e.request, copy));
         }
         return res;
-      }).catch(() => caches.match('/rechazos-app/reporte_rechazo.html'));
+      }).catch(() => caches.match('/rechazos-app/index.html'));
     })
   );
 });
